@@ -16,30 +16,42 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ats.gfplsecurity.common.Firebase;
+import com.ats.gfplsecurity.model.DashboardCount;
 import com.ats.gfplsecurity.model.DocumentHandover;
 import com.ats.gfplsecurity.model.EmpGatepass;
+import com.ats.gfplsecurity.model.EmpGatepassCount;
 import com.ats.gfplsecurity.model.EmpGatepassDisplay;
 import com.ats.gfplsecurity.model.Employee;
 import com.ats.gfplsecurity.model.EmployeeDepartment;
 import com.ats.gfplsecurity.model.EmployeeDisplay;
+import com.ats.gfplsecurity.model.Location;
+import com.ats.gfplsecurity.model.MatGatepassCount;
+import com.ats.gfplsecurity.model.MatGatepassEmpWiseCount;
 import com.ats.gfplsecurity.model.MaterialGatepass;
 import com.ats.gfplsecurity.model.MaterialGatepassDisplay;
 import com.ats.gfplsecurity.model.Notification;
 import com.ats.gfplsecurity.model.Purpose;
 import com.ats.gfplsecurity.model.Settings;
+import com.ats.gfplsecurity.model.SupGatepassCount;
+import com.ats.gfplsecurity.model.VisAndMaintGatepassCount;
 import com.ats.gfplsecurity.model.Visitor;
 import com.ats.gfplsecurity.model.VisitorGatepassDisplay;
 import com.ats.gfplsecurity.repository.DocumentHandoverRepository;
+import com.ats.gfplsecurity.repository.EmpGatepassCountRepo;
 import com.ats.gfplsecurity.repository.EmpGatepassDisplayRepo;
 import com.ats.gfplsecurity.repository.EmpGatepassRepository;
 import com.ats.gfplsecurity.repository.EmployeeDepartmentRepository;
 import com.ats.gfplsecurity.repository.EmployeeDisplayRepository;
 import com.ats.gfplsecurity.repository.EmployeeRepository;
+import com.ats.gfplsecurity.repository.MatGatepassCountRepo;
+import com.ats.gfplsecurity.repository.MatGatepassEmpWiseCountRepo;
 import com.ats.gfplsecurity.repository.MaterialGatepassDisplayRepo;
 import com.ats.gfplsecurity.repository.MaterialGatepassRepository;
 import com.ats.gfplsecurity.repository.NotificationRepository;
 import com.ats.gfplsecurity.repository.PurposeRepository;
 import com.ats.gfplsecurity.repository.SettingsRepository;
+import com.ats.gfplsecurity.repository.SupGatepassCountRepo;
+import com.ats.gfplsecurity.repository.VisAndMaintGatepassCountRepo;
 import com.ats.gfplsecurity.repository.VisitorGatepassDisplayRepository;
 import com.ats.gfplsecurity.repository.VisitorRepository;
 import com.ats.gfplsecurity.common.Info;
@@ -83,14 +95,24 @@ public class TransactionController {
 
 	@Autowired
 	SettingsRepository settingsRepository;
-	
+
 	@Autowired
 	EmpGatepassRepository empGatepassRepository;
-	
-	
-	
-	
-	
+
+	@Autowired
+	VisAndMaintGatepassCountRepo visAndMaintGatepassCountRepo;
+
+	@Autowired
+	EmpGatepassCountRepo empGatepassCountRepo;
+
+	@Autowired
+	SupGatepassCountRepo supGatepassCountRepo;
+
+	@Autowired
+	MatGatepassCountRepo matGatepassCountRepo;
+
+	@Autowired
+	MatGatepassEmpWiseCountRepo matGatepassEmpWiseCountRepo;
 
 	@PostMapping("/getVisitorGatepassListInDate")
 	public @ResponseBody List<VisitorGatepassDisplay> getVisitorGatepassListInDate(
@@ -263,10 +285,10 @@ public class TransactionController {
 			visitor.setExVar1(settings.getSettingKey() + "" + settings.getSettingValue());
 
 			result = visitorRepository.save(visitor);
-			
-			SimpleDateFormat sdf=new SimpleDateFormat("HH:mm");
-			Calendar cal=Calendar.getInstance();
-			
+
+			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+			Calendar cal = Calendar.getInstance();
+
 			visitor.setInTime(sdf.format(cal.getTimeInMillis()));
 
 			if (result != null) {
@@ -283,7 +305,7 @@ public class TransactionController {
 				if (empIdList.size() > 0) {
 					for (int i = 0; i < empIdList.size(); i++) {
 
-						Employee emp = employeeRepository.findByEmpIdAndDelStatus(empIdList.get(i),1);
+						Employee emp = employeeRepository.findByEmpIdAndDelStatus(empIdList.get(i), 1);
 						Purpose purpose = purposeRepository.findByPurposeId(result.getPurposeId());
 
 						Notification notification = new Notification(0, result.getGatepassVisitorId(), empIdList.get(i),
@@ -428,54 +450,51 @@ public class TransactionController {
 		Info info = new Info();
 
 		try {
-			
-			SimpleDateFormat sdf=new SimpleDateFormat("HH:mm");
-			
-			Calendar cal1=Calendar.getInstance();
-			
-			String outTime=sdf.format(cal1.getTimeInMillis());
-			
-			Visitor visitor=visitorRepository.findByGatepassVisitorId(gatepassVisitorId);
-			
-			String inTime="00:00";
-			if(visitor!=null) {
-				inTime=visitor.getInTime();
+
+			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+
+			Calendar cal1 = Calendar.getInstance();
+
+			String outTime = sdf.format(cal1.getTimeInMillis());
+
+			Visitor visitor = visitorRepository.findByGatepassVisitorId(gatepassVisitorId);
+
+			String inTime = "00:00";
+			if (visitor != null) {
+				inTime = visitor.getInTime();
 			}
 
-			SimpleDateFormat sdfTime=new SimpleDateFormat("HH:mm");
+			SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm");
 
-			
-			String timeDiff="0";
-			String date="";
-			
-			Date d1,d2;
+			String timeDiff = "0";
+			String date = "";
+
+			Date d1, d2;
 
 			try {
-			
-				System.out.println("OUT TIME --------------------------------------- "+outTime);
-				System.out.println("IN TIME --------------------------------------- "+inTime);
-				
-				d1=sdfTime.parse(outTime);
-				d2=sdfTime.parse(inTime);
-				
-				long diff=d1.getTime()-d2.getTime();
-				
+
+				System.out.println("OUT TIME --------------------------------------- " + outTime);
+				System.out.println("IN TIME --------------------------------------- " + inTime);
+
+				d1 = sdfTime.parse(outTime);
+				d2 = sdfTime.parse(inTime);
+
+				long diff = d1.getTime() - d2.getTime();
+
 				long diffSeconds = diff / 1000 % 60;
 				long diffMinutes = diff / (60 * 1000) % 60;
 				long diffHours = diff / (60 * 60 * 1000) % 24;
 				long diffDays = diff / (24 * 60 * 60 * 1000);
-				
-				timeDiff=diffHours+"."+diffMinutes;
-				
-				System.out.println("TIME DIFF --------------------------------------- "+timeDiff);
-				
-				
-			}catch(Exception e) {
+
+				timeDiff = diffHours + "." + diffMinutes;
+
+				System.out.println("TIME DIFF --------------------------------------- " + timeDiff);
+
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			
 
-			int updateStatus = visitorRepository.updateGatepassStatus(gatepassVisitorId, status,outTime,timeDiff);
+			int updateStatus = visitorRepository.updateGatepassStatus(gatepassVisitorId, status, outTime, timeDiff);
 
 			if (updateStatus > 0) {
 
@@ -700,9 +719,9 @@ public class TransactionController {
 				int updateRes = settingsRepository.updateValue(1, "" + value);
 
 				String toDeptName = employeeRepository.getDeptNameByEmpId(result.getSecurityId());
-				Employee emp = employeeRepository.findByEmpIdAndDelStatus(result.getSecurityId(),1);
+				Employee emp = employeeRepository.findByEmpIdAndDelStatus(result.getSecurityId(), 1);
 
-				EmployeeDepartment dept = employeeDepartmentRepository.findByEmpDeptIdAndDelStatus(1,1);
+				EmployeeDepartment dept = employeeDepartmentRepository.findByEmpDeptIdAndDelStatus(1, 1);
 
 				String supplierDeptName = "";
 
@@ -851,361 +870,446 @@ public class TransactionController {
 		return resultList;
 
 	}
-	
-	
-	//--------------------------------------7-6-19----------------------------------------------------------
-	
+
+	// --------------------------------------7-6-19----------------------------------------------------------
+
 	// -- Material Gatepass Tracking List By Date, Dept, SUP , Status
-		@PostMapping("/getMaterialTrackGPListWithSupFilter")
-		public @ResponseBody List<MaterialGatepassDisplay> getMaterialTrackGPListWithSupFilter(
-				@RequestParam(value = "fromDate") String fromDate, @RequestParam(value = "toDate") String toDate,
-				@RequestParam(value = "deptIds") List<Integer> deptIds,
-				@RequestParam(value = "supIds") List<Integer> supIds,
-				@RequestParam(value = "status") List<Integer> status) {
+	@PostMapping("/getMaterialTrackGPListWithSupFilter")
+	public @ResponseBody List<MaterialGatepassDisplay> getMaterialTrackGPListWithSupFilter(
+			@RequestParam(value = "fromDate") String fromDate, @RequestParam(value = "toDate") String toDate,
+			@RequestParam(value = "deptIds") List<Integer> deptIds,
+			@RequestParam(value = "supIds") List<Integer> supIds,
+			@RequestParam(value = "status") List<Integer> status) {
 
-			List<MaterialGatepassDisplay> resultList = null;
+		List<MaterialGatepassDisplay> resultList = null;
 
-			try {
+		try {
 
-				if (status.contains(-1)) {
-					status.clear();
-					status.add(0);
-					status.add(1);
-					status.add(2);
-					status.add(3);
-				}
-
-				if (deptIds.contains(-1) && supIds.contains(-1)) {
-
-					resultList = materialGatepassDisplayRepo.getMatTrackingListByDateByStatus(fromDate, toDate, status);
-
-				} else if (!deptIds.contains(-1) && supIds.contains(-1)) {
-
-					resultList = materialGatepassDisplayRepo.getMatTrackingListByDateByDeptByStatus(fromDate, toDate,
-							deptIds, status);
-
-				} else if (deptIds.contains(-1) && !supIds.contains(-1)) {
-
-					resultList = materialGatepassDisplayRepo.getMatTrackingListByDateBySupByStatus(fromDate, toDate, supIds,
-							status);
-
-				} else if (!deptIds.contains(-1) && !supIds.contains(-1)) {
-
-					resultList = materialGatepassDisplayRepo.getMatTrackingListByDateByDeptBySupByStatus(fromDate, toDate,
-							deptIds, supIds, status);
-
-				}
-
-				if (resultList != null) {
-
-					for (int i = 0; i < resultList.size(); i++) {
-
-						MaterialGatepassDisplay disp = resultList.get(i);
-
-						List<DocumentHandover> docList = documentHandoverRepository.findByDelStatusAndGatepassInwardId(1,
-								disp.getGatepassInwardId());
-
-						disp.setDocHandoverDetail(docList);
-
-					}
-
-				}
-
-			} catch (Exception e) {
-				e.printStackTrace();
+			if (status.contains(-1)) {
+				status.clear();
+				status.add(0);
+				status.add(1);
+				status.add(2);
+				status.add(3);
 			}
 
-			return resultList;
+			if (deptIds.contains(-1) && supIds.contains(-1)) {
 
+				resultList = materialGatepassDisplayRepo.getMatTrackingListByDateByStatus(fromDate, toDate, status);
+
+			} else if (!deptIds.contains(-1) && supIds.contains(-1)) {
+
+				resultList = materialGatepassDisplayRepo.getMatTrackingListByDateByDeptByStatus(fromDate, toDate,
+						deptIds, status);
+
+			} else if (deptIds.contains(-1) && !supIds.contains(-1)) {
+
+				resultList = materialGatepassDisplayRepo.getMatTrackingListByDateBySupByStatus(fromDate, toDate, supIds,
+						status);
+
+			} else if (!deptIds.contains(-1) && !supIds.contains(-1)) {
+
+				resultList = materialGatepassDisplayRepo.getMatTrackingListByDateByDeptBySupByStatus(fromDate, toDate,
+						deptIds, supIds, status);
+
+			}
+
+			if (resultList != null) {
+
+				for (int i = 0; i < resultList.size(); i++) {
+
+					MaterialGatepassDisplay disp = resultList.get(i);
+
+					List<DocumentHandover> docList = documentHandoverRepository.findByDelStatusAndGatepassInwardId(1,
+							disp.getGatepassInwardId());
+
+					disp.setDocHandoverDetail(docList);
+
+				}
+
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-	
-	//------------------------------------------------------------------------------------------------------
 
-	
+		return resultList;
+
+	}
+
+	// ------------------------------------------------------------------------------------------------------
+
 	// --- Update material gatepass status
 	@PostMapping("/updateMaterialGatepass")
-	public @ResponseBody Info updateMaterialGatepass(
-			@RequestParam(value = "headerList") List<Integer> ids,
-			@RequestParam(value = "status") int status  ) {
+	public @ResponseBody Info updateMaterialGatepass(@RequestParam(value = "headerList") List<Integer> ids,
+			@RequestParam(value = "status") int status) {
 
 		Info info = new Info();
 
 		try {
-			
-			List<MaterialGatepass> matGpList=materialGatepassRepository.getMatGPList(ids);
-			
-			if(matGpList.size()>0) {
-				
-				for(int i=0;i<matGpList.size();i++) {
-					
-					MaterialGatepass disp=matGpList.get(i);
+
+			List<MaterialGatepass> matGpList = materialGatepassRepository.getMatGPList(ids);
+
+			if (matGpList.size() > 0) {
+
+				for (int i = 0; i < matGpList.size(); i++) {
+
+					MaterialGatepass disp = matGpList.get(i);
 					List<DocumentHandover> docList = documentHandoverRepository.findByDelStatusAndGatepassInwardId(1,
 							disp.getGatepassInwardId());
 
-					if(docList!=null) {
-						if(docList.size()>0) {
-							
-							DocumentHandover doc=docList.get(docList.size()-1);
+					if (docList != null) {
+						if (docList.size() > 0) {
+
+							DocumentHandover doc = docList.get(docList.size() - 1);
 							doc.setStatus(status);
-							
-							DocumentHandover saveDoc=documentHandoverRepository.save(doc);
-							
-							if(saveDoc!=null) {
+
+							DocumentHandover saveDoc = documentHandoverRepository.save(doc);
+
+							if (saveDoc != null) {
 								disp.setToStatus(status);
-								MaterialGatepass matGp=materialGatepassRepository.save(disp);
-								
-								if(matGp!=null) {
+								MaterialGatepass matGp = materialGatepassRepository.save(disp);
+
+								if (matGp != null) {
 									info.setError(false);
 									info.setMessage("Status Updated Successfully");
-								}else {
+								} else {
 									info.setError(false);
 									info.setMessage("Failed to Update Status ");
 								}
-								
-							}else {
+
+							} else {
 								info.setError(false);
 								info.setMessage("Failed to Update Status ");
 							}
-							
+
 						}
 					}
-					
+
 				}
-				
+
 			}
-			
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
-				info.setError(false);
-				info.setMessage("Failed to Update Status ");
+			info.setError(false);
+			info.setMessage("Failed to Update Status ");
 		}
 
 		return info;
 
 	}
 
-	
-	
 	// --- Material gatepass handover
 	@PostMapping("/materialGatepassHandover")
-	public @ResponseBody Info materialGatepassHandover(
-			@RequestParam(value = "headerIdList") List<Integer> matGpIdList,
-			@RequestParam(value = "fromEmpId") int fromEmpId,
-			@RequestParam(value = "fromDeptId") int fromDeptId,
-			@RequestParam(value = "toEmpId") int toEmpId,
-			@RequestParam(value = "toDeptId") int toDeptId) {
+	public @ResponseBody Info materialGatepassHandover(@RequestParam(value = "headerIdList") List<Integer> matGpIdList,
+			@RequestParam(value = "fromEmpId") int fromEmpId, @RequestParam(value = "fromDeptId") int fromDeptId,
+			@RequestParam(value = "toEmpId") int toEmpId, @RequestParam(value = "toDeptId") int toDeptId) {
 
 		Info info = new Info();
 
 		try {
-			
-			
-			
-			if(matGpIdList.size()>0) {
-				
-				for(int i=0;i<matGpIdList.size();i++) {
-					
-					MaterialGatepass disp=materialGatepassRepository.findByGatepassInwardId(matGpIdList.get(i));
-					
-					if(disp!=null) {
-						
-						Employee fromEmp=employeeRepository.findByEmpIdAndDelStatus(fromEmpId,1);
-						Employee toEmp=employeeRepository.findByEmpIdAndDelStatus(toEmpId,1);
-						EmployeeDepartment fromDept=employeeDepartmentRepository.findByEmpDeptIdAndDelStatus(fromDeptId,1);
-						EmployeeDepartment toDept=employeeDepartmentRepository.findByEmpDeptIdAndDelStatus(toDeptId,1);
-						
+
+			if (matGpIdList.size() > 0) {
+
+				for (int i = 0; i < matGpIdList.size(); i++) {
+
+					MaterialGatepass disp = materialGatepassRepository.findByGatepassInwardId(matGpIdList.get(i));
+
+					if (disp != null) {
+
+						Employee fromEmp = employeeRepository.findByEmpIdAndDelStatus(fromEmpId, 1);
+						Employee toEmp = employeeRepository.findByEmpIdAndDelStatus(toEmpId, 1);
+						EmployeeDepartment fromDept = employeeDepartmentRepository
+								.findByEmpDeptIdAndDelStatus(fromDeptId, 1);
+						EmployeeDepartment toDept = employeeDepartmentRepository.findByEmpDeptIdAndDelStatus(toDeptId,
+								1);
+
 						SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 						String currDate = sdf.format(Calendar.getInstance().getTimeInMillis());
-						
-						String fromEmpName=fromEmp.getEmpFname()+" "+fromEmp.getEmpMname()+fromEmp.getEmpSname();
-						String toEmpName=toEmp.getEmpFname()+" "+fromEmp.getEmpMname()+fromEmp.getEmpSname();
-						
+
+						String fromEmpName = fromEmp.getEmpFname() + " " + fromEmp.getEmpMname()
+								+ fromEmp.getEmpSname();
+						String toEmpName = toEmp.getEmpFname() + " " + fromEmp.getEmpMname() + fromEmp.getEmpSname();
+
 						DocumentHandover docHandover = new DocumentHandover(0, disp.getGatepassInwardId(), currDate,
-								fromEmpId, toEmpId, fromEmpName, toEmpName, 0,
-								1, fromDeptId, fromDept.getEmpDeptName(), toDeptId, toDept.getEmpDeptName(), 0, 0, 0, "na", "na", "na");
+								fromEmpId, toEmpId, fromEmpName, toEmpName, 0, 1, fromDeptId, fromDept.getEmpDeptName(),
+								toDeptId, toDept.getEmpDeptName(), 0, 0, 0, "na", "na", "na");
 
 						DocumentHandover doc = documentHandoverRepository.save(docHandover);
-						
-						if(doc!=null) {
-							
+
+						if (doc != null) {
+
 							disp.setToDeptId(toDeptId);
 							disp.setToEmpId(toEmpId);
 							disp.setToStatus(0);
 							disp.setStatus(0);
 							disp.setToDeptName(toDept.getEmpDeptName());
 							disp.setToEmpName(toEmpName);
-							
-							MaterialGatepass matGp=materialGatepassRepository.save(disp);
-							
-							if(matGp!=null) {
+
+							MaterialGatepass matGp = materialGatepassRepository.save(disp);
+
+							if (matGp != null) {
 								info.setError(false);
 								info.setMessage("Success");
-							}else {
+							} else {
 								info.setError(false);
 								info.setMessage("Failed");
 							}
-							
-							
-						}else {
+
+						} else {
 							info.setError(false);
 							info.setMessage("Failed");
 						}
-						
+
 					}
-					
+
 				}
-				
+
 				info.setError(false);
 				info.setMessage("Success");
-				
+
 			}
-			
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
-				info.setError(false);
-				info.setMessage("Failed");
+			info.setError(false);
+			info.setMessage("Failed");
 		}
 
 		return info;
 
 	}
-	
-	
+
 	// --- Update Employee gatepass
 	@PostMapping("/updateEmpGatepass")
-	public @ResponseBody Info updateEmpGatepass(
-			@RequestParam(value = "gatepassEmpId") int gatepassEmpId,
-			@RequestParam(value = "securityId") int securityId,
-			@RequestParam(value = "status") int status,
+	public @ResponseBody Info updateEmpGatepass(@RequestParam(value = "gatepassEmpId") int gatepassEmpId,
+			@RequestParam(value = "securityId") int securityId, @RequestParam(value = "status") int status,
 			@RequestParam(value = "type") int type) {
-		
-	Info info=new Info();
 
-	
-	SimpleDateFormat sdfDate=new SimpleDateFormat("yyyy-MM-dd");
-	SimpleDateFormat sdfTime=new SimpleDateFormat("HH:mm:ss");
+		Info info = new Info();
 
-	String outTime="";
-	String inTime="";
-	String timeDiff="";
-	String date="";
-	
-	Date d1,d2;
+		SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm:ss");
 
-	try {
-		
-		Calendar cal=Calendar.getInstance();
-		outTime=sdfTime.format(cal.getTimeInMillis());
-		inTime=sdfTime.format(cal.getTimeInMillis());
-		date=sdfDate.format(cal.getTimeInMillis());
-		
-		d1=sdfTime.parse(outTime);
-		d2=sdfTime.parse(inTime);
-		
-		long diff=d2.getTime()-d1.getTime();
-		
-		long diffSeconds = diff / 1000 % 60;
-		long diffMinutes = diff / (60 * 1000) % 60;
-		long diffHours = diff / (60 * 60 * 1000) % 24;
-		long diffDays = diff / (24 * 60 * 60 * 1000);
-		
-		timeDiff=diffHours+":"+diffMinutes;
-		
-	}catch(Exception e) {
-		e.printStackTrace();
-	}
+		String outTime = "";
+		String inTime = "";
+		String timeDiff = "";
+		String date = "";
 
-	
-	if(type==2) {
-		
-		int updateResult=empGatepassRepository.updateEmpGatepassStatusToClose(gatepassEmpId, securityId, 2, date, outTime, inTime, timeDiff);
-		
-		if (updateResult > 0) {
+		Date d1, d2;
 
-			info.setError(false);
-			info.setMessage("Updated Successfully");
+		try {
+
+			Calendar cal = Calendar.getInstance();
+			outTime = sdfTime.format(cal.getTimeInMillis());
+			inTime = sdfTime.format(cal.getTimeInMillis());
+			date = sdfDate.format(cal.getTimeInMillis());
+
+			d1 = sdfTime.parse(outTime);
+			d2 = sdfTime.parse(inTime);
+
+			long diff = d2.getTime() - d1.getTime();
+
+			long diffSeconds = diff / 1000 % 60;
+			long diffMinutes = diff / (60 * 1000) % 60;
+			long diffHours = diff / (60 * 60 * 1000) % 24;
+			long diffDays = diff / (24 * 60 * 60 * 1000);
+
+			timeDiff = diffHours + ":" + diffMinutes;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		if (type == 2) {
+
+			int updateResult = empGatepassRepository.updateEmpGatepassStatusToClose(gatepassEmpId, securityId, 2, date,
+					outTime, inTime, timeDiff);
+
+			if (updateResult > 0) {
+
+				info.setError(false);
+				info.setMessage("Updated Successfully");
+
+			} else {
+
+				info.setError(true);
+				info.setMessage("failed");
+
+			}
 
 		} else {
 
+			if (status == 1) {
+
+				int result = empGatepassRepository.updateEmpGatepassStatusToOut(gatepassEmpId, securityId, status, date,
+						outTime);
+
+				if (result > 0) {
+
+					info.setError(false);
+					info.setMessage("Updated Successfully");
+
+				} else {
+
+					info.setError(true);
+					info.setMessage("failed");
+
+				}
+
+			} else if (status == 2) {
+
+				EmpGatepass empGatepass = empGatepassRepository.findByGatepassEmpId(gatepassEmpId);
+
+				try {
+
+					Calendar cal = Calendar.getInstance();
+					// outTime=sdfTime.format(cal.getTimeInMillis());
+					inTime = sdfTime.format(cal.getTimeInMillis());
+					date = sdfDate.format(cal.getTimeInMillis());
+
+					d1 = sdfTime.parse(empGatepass.getNewOutTime());
+					d2 = sdfTime.parse(inTime);
+
+					long diff = d2.getTime() - d1.getTime();
+
+					long diffSeconds = diff / 1000 % 60;
+					long diffMinutes = diff / (60 * 1000) % 60;
+					long diffHours = diff / (60 * 60 * 1000) % 24;
+					long diffDays = diff / (24 * 60 * 60 * 1000);
+
+					timeDiff = diffHours + ":" + diffMinutes;
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+				int result = empGatepassRepository.updateEmpGatepassStatusToIn(gatepassEmpId, securityId, status, date,
+						inTime, timeDiff);
+
+				if (result > 0) {
+
+					info.setError(false);
+					info.setMessage("Updated Successfully");
+
+				} else {
+
+					info.setError(true);
+					info.setMessage("failed");
+
+				}
+
+			}
+
+		}
+
+		return info;
+
+	}
+
+	// --Send Notification--
+	@PostMapping("/sendNotification")
+	public Info sendNotification(@RequestParam(value = "gatepassVisitorId") int gatepassVisitorId,
+			@RequestParam(value = "empId") int empId) {
+		Info info = new Info();
+
+		try {
+
+			Visitor visitor = visitorRepository.findByGatepassVisitorId(gatepassVisitorId);
+			Employee emp = employeeRepository.findByEmpIdAndDelStatus(empId, 1);
+
+			if (visitor != null) {
+
+				String token = emp.getExVar1();
+
+				String type = "";
+				if (visitor.getGatePasstype() == 1) {
+					type = "Visitor";
+				} else {
+					type = "Maintenance";
+				}
+
+				Firebase.sendPushNotifForCommunication(token, "" + type + " Gatepass",
+						"" + visitor.getPersonName() + " wants to visit. Please take action on this.",
+						"" + visitor.getGatePasstype());
+
+				info.setError(false);
+				info.setMessage("Notification Sent Successfully");
+
+			} else {
+				info.setError(true);
+				info.setMessage("Failed to Send Notification");
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
 			info.setError(true);
-			info.setMessage("failed");
-
+			info.setMessage("Failed to Send Notification");
 		}
-		
-	}else {
-		
-		if(status==1) {
-			
-			int result=empGatepassRepository.updateEmpGatepassStatusToOut(gatepassEmpId, securityId, status, date, outTime);
-			
 
-			if (result > 0) {
-
-				info.setError(false);
-				info.setMessage("Updated Successfully");
-
-			} else {
-
-				info.setError(true);
-				info.setMessage("failed");
-
-			}
-			
-		}else if(status==2) {
-
-			EmpGatepass empGatepass=empGatepassRepository.findByGatepassEmpId(gatepassEmpId);
-			
-			try {
-				
-				Calendar cal=Calendar.getInstance();
-				//outTime=sdfTime.format(cal.getTimeInMillis());
-				inTime=sdfTime.format(cal.getTimeInMillis());
-				date=sdfDate.format(cal.getTimeInMillis());
-				
-				d1=sdfTime.parse(empGatepass.getNewOutTime());
-				d2=sdfTime.parse(inTime);
-				
-				long diff=d2.getTime()-d1.getTime();
-				
-				long diffSeconds = diff / 1000 % 60;
-				long diffMinutes = diff / (60 * 1000) % 60;
-				long diffHours = diff / (60 * 60 * 1000) % 24;
-				long diffDays = diff / (24 * 60 * 60 * 1000);
-				
-				timeDiff=diffHours+":"+diffMinutes;
-				
-			}catch(Exception e) {
-				e.printStackTrace();
-			}
-			
-			
-			int result=empGatepassRepository.updateEmpGatepassStatusToIn(gatepassEmpId, securityId, status, date, inTime, timeDiff);
-			
-			if (result > 0) {
-
-				info.setError(false);
-				info.setMessage("Updated Successfully");
-
-			} else {
-
-				info.setError(true);
-				info.setMessage("failed");
-
-			}
-			
-		}
-		
-	}
-	
-	return info;
-		
+		return info;
 	}
 
-	
-	
-	
+	// ----------------------------DASHBOARD
+	// COUNT-----------------------------------------------------
 
-	
+	@PostMapping("/dashboardCount")
+	public @ResponseBody DashboardCount getDashboardCount(@RequestParam(value = "fromDate") String fromDate,
+			@RequestParam(value = "toDate") String toDate, @RequestParam(value = "empId") int empId) {
+
+		DashboardCount dashResult = new DashboardCount();
+
+		try {
+
+			Employee emp = employeeRepository.findByEmpIdAndDelStatus(empId, 1);
+
+			Settings settings = settingsRepository.findBySettingId(2);
+
+			VisAndMaintGatepassCount visCount = visAndMaintGatepassCountRepo.getVisAndMaintCount(fromDate, toDate,
+					empId);
+
+			int inCompCount = 0, visTotal = 0, matTotal = 0, empVisTotal = 0;
+
+			inCompCount = visCount.getVisitor_approved() + visCount.getVisitor_pending();
+			visTotal = visCount.getVisitor_approved() + visCount.getVisitor_pending() + visCount.getVisitor_rejected()
+					+ visCount.getVisitor_completed();
+			matTotal = visCount.getMaint_approved() + visCount.getMaint_pending() + visCount.getMaint_rejected();
+			empVisTotal = visCount.getEmp_visitor_approved() + visCount.getEmp_visitor_pending()
+					+ visCount.getEmp_visitor_rejected() + visCount.getEmp_visitor_completed();
+
+			visCount.setVisitor_in_comp(inCompCount);
+			visCount.setVisitor_total(visTotal);
+			visCount.setEmp_visitor_total(empVisTotal);
+			visCount.setMaint_total(matTotal);
+
+			dashResult.setVisAndMaintGatepassCount(visCount);
+
+			// ----------------------EMP GATEPASS--------------------------------
+
+			EmpGatepassCount empCount = empGatepassCountRepo.getEmpGatepassCount(fromDate, toDate);
+			dashResult.setEmpGatepassCount(empCount);
+
+			if (settings.getSettingValue().equalsIgnoreCase(String.valueOf(emp.getEmpCatId()))) {
+
+				SupGatepassCount supCount = supGatepassCountRepo.getSupGatepassCount(fromDate, toDate, empId);
+				dashResult.setSupGatepassCount(supCount);
+			}
+
+			// ------------------MATERIAL
+			// GATEPASS--------------------------------------------
+
+			MatGatepassCount matCount = matGatepassCountRepo.getMatGatepassCount(fromDate, toDate, emp.getEmpDeptId());
+			dashResult.setMatGatepassCount(matCount);
+
+			MatGatepassEmpWiseCount matEmpCount = matGatepassEmpWiseCountRepo.getMatGatepassCount(fromDate, toDate, 1);
+			dashResult.setMatGatepassEmpWiseCount(matEmpCount);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return dashResult;
+	}
+
 }

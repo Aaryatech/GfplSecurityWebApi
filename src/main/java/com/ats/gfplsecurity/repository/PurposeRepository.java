@@ -1,5 +1,6 @@
 package com.ats.gfplsecurity.repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import java.util.Optional;
@@ -15,5 +16,7 @@ public interface PurposeRepository extends JpaRepository<Purpose, Integer>{
 	List<Purpose> findAllByDelStatus(int delStatus);
 
 	Purpose findByPurposeId(int purposeId);
+	
+	List<Purpose> findByDelStatusAndPurposeTypeIn(int delStatus,ArrayList<Integer> typeList);
 
 }

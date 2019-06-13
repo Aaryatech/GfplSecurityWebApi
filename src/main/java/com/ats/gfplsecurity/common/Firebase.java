@@ -30,7 +30,7 @@ public class Firebase {
 	 * <version>chargebee-1.0</version> </dependency>
 	 */
 	// Method to send Notifications from server to client end.
-		public final static String AUTH_KEY_FCM = "AAAA1UxWRjk:APA91bH-CRjip_O089lrtJLtiSobfqlsOFFs__u0yl3GBNduiXWijlvJjQmD694QqicAojH_TrLIMifI_YFMg56uvLdCN-Zbbv6nJHMRWjoLXeVNmWfxIhgpsBBFzXvAWdFQGdb-HqTz";
+		public final static String AUTH_KEY_FCM = "AAAA_pkE7j8:APA91bF8N3Shx3Sct36Rut_lhDCqyfacyBecmSGNQ5D4YAyt0CGSL_nfciBKwNaW3K0--2Zm2e9J9BU62e8qboI9beElB_oArhpzJ5eS1KWWSyBwyKEjhPnGAoJB4tIhANdfzfjbkjqs";
 
 		public final static String API_URL_FCM = "https://fcm.googleapis.com/fcm/send";
 

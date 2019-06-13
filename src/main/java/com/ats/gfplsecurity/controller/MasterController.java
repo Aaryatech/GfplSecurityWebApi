@@ -110,40 +110,44 @@ public class MasterController {
 	@Autowired
 	VisitCardRepository visitCardRepository;
 
-	
 	@Autowired
 	PurposeDisplayRepository purposeDisplayRepository;
-	
+
 	@Autowired
 	SettingsRepository settingsRepository;
-	
+
 	@Autowired
 	EmployeeCategoryDisplayRepo employeeCategoryDisplayRepo;
-	
+
 	@Autowired
 	EmpDeptDisplayRepo empDeptDisplayRepo;
-	
+
 	@Autowired
 	LocationRepo locationRepo;
 
 	@Autowired
 	LocationDisplayRepo locationDisplayRepo;
-	
+
 	@Autowired
 	EmployeeDisplayRepository employeeDisplayRepository;
 
-	
 	// --Get all Purposes--
 	@GetMapping("/allPurposes")
 	public List<Purpose> getAllPurposes() {
 		return purposeRepository.findAllByDelStatus(1);
 	}
-	
+
 	// --Get all Purposes--
-		@GetMapping("/getAllPurposes")
-		public List<PurposeDisplay> getAllPurposesWithName() {
-			return purposeDisplayRepository.getAllPurposeList();
-		}
+	@GetMapping("/getAllPurposes")
+	public List<PurposeDisplay> getAllPurposesWithName() {
+		return purposeDisplayRepository.getAllPurposeList();
+	}
+
+	// --Get all Purposes by type--
+	@PostMapping("/getAllPurposesByType")
+	public List<Purpose> getAllPurposesByType(@RequestParam(value = "typeList") ArrayList<Integer> typeList) {
+		return purposeRepository.findByDelStatusAndPurposeTypeIn(1, typeList);
+	}
 
 	// --Save new Purpose--
 	@PostMapping("/savePurpose")
@@ -217,35 +221,33 @@ public class MasterController {
 	public List<Employee> getAllEmployees() {
 		return employeeRepository.findAllByDelStatus(1);
 	}
-	
-	
+
 	// --Get all Employees--
 	@GetMapping("/allEmployeeList")
 	public List<EmployeeDisplay> getAllEmployeeList() {
 		return employeeDisplayRepository.getAllEmpList();
 	}
-	
+
 	// --Get all Supervisor Employees--
-		@GetMapping("/allSupervisorList")
-		public List<Employee> getAllSupervisorList() {
-			
-			Settings settings=settingsRepository.findBySettingId(2);
-			List<Employee> result=new ArrayList();
-			
-			try {
-				
-				if(settings!=null) {
-					result=employeeRepository.findAllByDelStatusAndEmpCatId(1,Integer.parseInt(settings.getSettingValue()));
-				}
-				
-			}catch(Exception e) {
-				e.printStackTrace();
+	@GetMapping("/allSupervisorList")
+	public List<Employee> getAllSupervisorList() {
+
+		Settings settings = settingsRepository.findBySettingId(2);
+		List<Employee> result = new ArrayList();
+
+		try {
+
+			if (settings != null) {
+				result = employeeRepository.findAllByDelStatusAndEmpCatId(1,
+						Integer.parseInt(settings.getSettingValue()));
 			}
-			
-			
-			return result;
+
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		
+
+		return result;
+	}
 
 	// --Save Employee--
 	@PostMapping("/saveEmployee")
@@ -256,7 +258,7 @@ public class MasterController {
 	// --Get Employee By Id--
 	@PostMapping("/getEmployeeById")
 	public Employee getEmployeeById(@RequestParam(value = "empId") int empId) {
-		return employeeRepository.findByEmpIdAndDelStatus(empId,1);
+		return employeeRepository.findByEmpIdAndDelStatus(empId, 1);
 	}
 
 	// --Delete Employee--
@@ -264,7 +266,7 @@ public class MasterController {
 	public Info deleteEmployee(@RequestParam(value = "empId") int empId) {
 		Info info = null;
 
-		Employee employee = employeeRepository.findByEmpIdAndDelStatus(empId,1);
+		Employee employee = employeeRepository.findByEmpIdAndDelStatus(empId, 1);
 
 		if (employee != null) {
 			employee.setDelStatus(0);
@@ -285,12 +287,11 @@ public class MasterController {
 	public List<EmployeeCategory> getAllEmployeeCategory() {
 		return employeeCategoryRepository.findAllByDelStatus(1);
 	}
-	
+
 	@GetMapping("/allEmployeeCategoryList")
 	public List<EmployeeCategoryDisplay> getAllEmployeeCategoryList() {
 		return employeeCategoryDisplayRepo.getEmpCategorylist();
 	}
-
 
 	// --Save Employee Category--
 	@PostMapping("/saveEmployeeCategory")
@@ -330,12 +331,12 @@ public class MasterController {
 	public List<EmployeeDepartment> getAllEmployeeDepartment() {
 		return employeeDepartmentRepository.findAllByDelStatus(1);
 	}
-	
+
 	// --Get all Employees Department--
-		@GetMapping("/allEmployeeDepartmentList")
-		public List<EmpDeptDisplay> getAllEmployeeDepartmentList() {
-			return empDeptDisplayRepo.getEmpDeptlist();
-		}
+	@GetMapping("/allEmployeeDepartmentList")
+	public List<EmpDeptDisplay> getAllEmployeeDepartmentList() {
+		return empDeptDisplayRepo.getEmpDeptlist();
+	}
 
 	// --Save Employee Department--
 	@PostMapping("/saveEmployeeDepartment")
@@ -346,7 +347,7 @@ public class MasterController {
 	// --Get Employee Department By Id--
 	@PostMapping("/getEmployeeDepartmentById")
 	public EmployeeDepartment getEmployeeDepartmentById(@RequestParam(value = "empDeptId") int empDeptId) {
-		return employeeDepartmentRepository.findByEmpDeptIdAndDelStatus(empDeptId,1);
+		return employeeDepartmentRepository.findByEmpDeptIdAndDelStatus(empDeptId, 1);
 	}
 
 	// --Delete Employee Department--
@@ -354,7 +355,7 @@ public class MasterController {
 	public Info deleteEmployeeDepartment(@RequestParam(value = "empDeptId") int empDeptId) {
 		Info info = null;
 
-		EmployeeDepartment employeeDept = employeeDepartmentRepository.findByEmpDeptIdAndDelStatus(empDeptId,1);
+		EmployeeDepartment employeeDept = employeeDepartmentRepository.findByEmpDeptIdAndDelStatus(empDeptId, 1);
 
 		if (employeeDept != null) {
 			employeeDept.setDelStatus(0);
@@ -418,8 +419,8 @@ public class MasterController {
 	// --Save Company--
 	@PostMapping("/saveCompany")
 	public Company saveCompany(@RequestBody Company company) {
-		
-		System.err.println("comp is::"+company.toString());
+
+		System.err.println("comp is::" + company.toString());
 		return companyRepository.save(company);
 	}
 
@@ -577,26 +578,26 @@ public class MasterController {
 	// --Save Employee Gatepass--
 	@PostMapping("/saveEmployeeGatepass")
 	public EmpGatepass saveEmployeeGatepass(@RequestBody EmpGatepass empGatepass) {
-		
-		EmpGatepass result=null;
-		
+
+		EmpGatepass result = null;
+
 		try {
-			Settings settings=settingsRepository.findBySettingId(1);
-			
-			empGatepass.setExVar1(settings.getSettingKey()+""+settings.getSettingValue());
-			
-			result=empGatepassRepository.save(empGatepass);
-			
-			if(result!=null) {
-				int val=Integer.parseInt(settings.getSettingValue());
-				int value=val+1;
-				int updateRes=settingsRepository.updateValue(1, ""+value);
+			Settings settings = settingsRepository.findBySettingId(1);
+
+			empGatepass.setExVar1(settings.getSettingKey() + "" + settings.getSettingValue());
+
+			result = empGatepassRepository.save(empGatepass);
+
+			if (result != null) {
+				int val = Integer.parseInt(settings.getSettingValue());
+				int value = val + 1;
+				int updateRes = settingsRepository.updateValue(1, "" + value);
 			}
-			
-		}catch(Exception e) {
+
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return result;
 	}
 
@@ -644,7 +645,6 @@ public class MasterController {
 	public Visitor getVisitorById(@RequestParam(value = "gatepassVisitorId") int gatepassVisitorId) {
 		return visitorRepository.findByGatepassVisitorId(gatepassVisitorId);
 	}
-	
 
 	// --Delete Visitor--
 	@PostMapping("/deleteVisitor")
@@ -684,12 +684,13 @@ public class MasterController {
 	public Notification getNotificationById(@RequestParam(value = "notificationId") int notificationId) {
 		return notificationRepository.findByNotificationId(notificationId);
 	}
-	
+
 	// --Get Notification By Id--
-		@PostMapping("/getNotificationByGatepassId")
-		public List<Notification> getNotificationByGatepassId(@RequestParam(value = "gatepassVisitorId") int gatepassVisitorId) {
-			return notificationRepository.findByGatepassVisitorIdAndDelStatus(gatepassVisitorId,1);
-		}
+	@PostMapping("/getNotificationByGatepassId")
+	public List<Notification> getNotificationByGatepassId(
+			@RequestParam(value = "gatepassVisitorId") int gatepassVisitorId) {
+		return notificationRepository.findByGatepassVisitorIdAndDelStatus(gatepassVisitorId, 1);
+	}
 
 	// --Delete Notification--
 	@PostMapping("/deleteNotification")
@@ -857,8 +858,7 @@ public class MasterController {
 		}
 		return info;
 	}
-	
-	
+
 	// -- Update App token
 	@RequestMapping(value = { "/updateToken" }, method = RequestMethod.POST)
 	public @ResponseBody Info updateToken(@RequestParam("empId") int empId, @RequestParam("token") String token) {
@@ -886,14 +886,7 @@ public class MasterController {
 		return info;
 
 	}
-	
-	
-	
-	
-	
-	
-	
-	
+
 	// --Get all Location--
 	@GetMapping("/allLocation")
 	public List<Location> getAllLocation() {
@@ -937,12 +930,11 @@ public class MasterController {
 		}
 		return info;
 	}
-	
 
 	// --Get all Settings--
-		@GetMapping("/allSettings")
-		public List<Settings> getAllSettings() {
-			return settingsRepository.findAll();
-		}
-	
+	@GetMapping("/allSettings")
+	public List<Settings> getAllSettings() {
+		return settingsRepository.findAll();
+	}
+
 }

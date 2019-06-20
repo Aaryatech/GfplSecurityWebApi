@@ -59,4 +59,20 @@ public class Employee  implements Serializable{
 	private String exVar1; 
 	private String exVar2; 
 	private String exVar3;
+	
+	private float grossSalary;
+	private float noOfHrs;
+	private String gender;
+	private String dob;
+	private String scanCopy1;
+	private String scanCopy2;
+	private Integer pf;
+	private Integer esic;
+	private Integer bonus;
+	private Integer cl;
+	private Integer sl;
+	private Integer pl;
+
+	
+	
 }

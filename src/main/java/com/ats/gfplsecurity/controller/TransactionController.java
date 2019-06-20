@@ -377,6 +377,32 @@ public class TransactionController {
 						info.setMessage("failed");
 					}
 
+					try {
+
+						Employee emp = employeeRepository.findByEmpIdAndDelStatus(empId, 1);
+						Visitor visitor = visitorRepository.findByGatepassVisitorId(gatepassVisitorId);
+
+						Employee securityEmp = employeeRepository.findByEmpIdAndDelStatus(visitor.getSecurityIdIn(), 1);
+
+						String type = "";
+						if (visitor.getGatePasstype() == 1) {
+							type = "Visitor";
+						} else {
+							type = "Maintenance";
+						}
+
+						Firebase.sendPushNotifForCommunication(securityEmp.getExVar1(),
+								"" + type + " Gatepass for " + visitor.getPersonName() + " from "
+										+ visitor.getPersonCompany() + " has Rejected",
+								"" + visitor.getPersonName() + " from " + visitor.getPersonCompany()
+										+ " company, gatepass has Rejected by " + emp.getEmpFname() + " "
+										+ emp.getEmpMname() + " " + emp.getEmpSname(),
+								"" + visitor.getGatePasstype());
+
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
 				} else {
 					info.setError(true);
 					info.setMessage("failed");
@@ -426,6 +452,32 @@ public class TransactionController {
 							info.setMessage("Updated Successfully");
 
 						}
+					}
+
+					try {
+
+						Employee emp = employeeRepository.findByEmpIdAndDelStatus(empId, 1);
+						Visitor visitor = visitorRepository.findByGatepassVisitorId(gatepassVisitorId);
+
+						Employee securityEmp = employeeRepository.findByEmpIdAndDelStatus(visitor.getSecurityIdIn(), 1);
+
+						String type = "";
+						if (visitor.getGatePasstype() == 1) {
+							type = "Visitor";
+						} else {
+							type = "Maintenance";
+						}
+
+						Firebase.sendPushNotifForCommunication(securityEmp.getExVar1(),
+								"" + type + " Gatepass for " + visitor.getPersonName() + " from "
+										+ visitor.getPersonCompany() + " has Approved",
+								"" + visitor.getPersonName() + " from " + visitor.getPersonCompany()
+										+ " company, gatepass has Approved by " + emp.getEmpFname() + " "
+										+ emp.getEmpMname() + " " + emp.getEmpSname(),
+								"" + visitor.getGatePasstype());
+
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
 
 				}
@@ -1132,6 +1184,26 @@ public class TransactionController {
 				info.setError(false);
 				info.setMessage("Updated Successfully");
 
+				try {
+
+					EmpGatepass gp = empGatepassRepository.findByGatepassEmpId(gatepassEmpId);
+
+					Employee emp = employeeRepository.findByEmpIdAndDelStatus(gp.getEmpId(), 1);
+
+					
+					Employee supEmp = employeeRepository.findByEmpIdAndDelStatus(gp.getUserId(), 1);
+					
+					SimpleDateFormat sdf=new SimpleDateFormat("dd/MM/yyyy hh:mm a");
+
+					Firebase.sendPushNotifForCommunication(
+							supEmp.getExVar1(), emp.getEmpFname()+" "+emp.getEmpMname()+" "+emp.getEmpSname()+" is Out of the factory",
+							emp.getEmpFname()+" "+emp.getEmpMname()+" "+emp.getEmpSname()+" is Out of the factory on "+sdf.format(Calendar.getInstance().getTimeInMillis()),
+							"3");
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
 			} else {
 
 				info.setError(true);
@@ -1150,6 +1222,27 @@ public class TransactionController {
 
 					info.setError(false);
 					info.setMessage("Updated Successfully");
+					
+					try {
+
+						EmpGatepass gp = empGatepassRepository.findByGatepassEmpId(gatepassEmpId);
+
+						Employee emp = employeeRepository.findByEmpIdAndDelStatus(gp.getEmpId(), 1);
+
+						
+						Employee supEmp = employeeRepository.findByEmpIdAndDelStatus(gp.getUserId(), 1);
+						
+						SimpleDateFormat sdf=new SimpleDateFormat("dd/MM/yyyy hh:mm a");
+
+						Firebase.sendPushNotifForCommunication(
+								supEmp.getExVar1(), emp.getEmpFname()+" "+emp.getEmpMname()+" "+emp.getEmpSname()+" is Out of the factory",
+								emp.getEmpFname()+" "+emp.getEmpMname()+" "+emp.getEmpSname()+" is Out of the factory on "+sdf.format(Calendar.getInstance().getTimeInMillis()),
+								"3");
+
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
 
 				} else {
 
@@ -1192,6 +1285,27 @@ public class TransactionController {
 
 					info.setError(false);
 					info.setMessage("Updated Successfully");
+					
+					try {
+
+						EmpGatepass gp = empGatepassRepository.findByGatepassEmpId(gatepassEmpId);
+
+						Employee emp = employeeRepository.findByEmpIdAndDelStatus(gp.getEmpId(), 1);
+
+						
+						Employee supEmp = employeeRepository.findByEmpIdAndDelStatus(gp.getUserId(), 1);
+						
+						SimpleDateFormat sdf=new SimpleDateFormat("dd/MM/yyyy hh:mm a");
+
+						Firebase.sendPushNotifForCommunication(
+								supEmp.getExVar1(), emp.getEmpFname()+" "+emp.getEmpMname()+" "+emp.getEmpSname()+" is back to the factory",
+								emp.getEmpFname()+" "+emp.getEmpMname()+" "+emp.getEmpSname()+" is back to the factory on "+sdf.format(Calendar.getInstance().getTimeInMillis()),
+								"3");
+
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
 
 				} else {
 
@@ -1311,5 +1425,45 @@ public class TransactionController {
 
 		return dashResult;
 	}
+	
+	
+	
+	
+	//---------------UNIQUE EMP CODE----------------
+	
+	@PostMapping("/checkUniqueEmpCode")
+	public @ResponseBody Info checkUniqueEmpCode(
+			@RequestParam(value = "code") String code) {
+
+		String  result = null;
+		Info info = new Info();
+
+		try {
+
+			Employee emp=employeeRepository.findByEmpCode(code);
+			System.err.println("UNIQUE CODE -----------------------------------------------------  "+emp);
+			
+			if(emp!=null) {
+				result="Yes";
+				info.setError(true);
+				info.setMessage("yes");
+			}else {
+				result="No";
+				info.setError(false);
+				info.setMessage("no");
+			}
+			
+			
+			System.err.println("UNIQUE CODE --------------------RESULT---------------------------------  "+result);
+			
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return info;
+
+	}
+	
 
 }

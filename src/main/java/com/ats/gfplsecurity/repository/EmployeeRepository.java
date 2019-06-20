@@ -24,6 +24,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer>{
 	
 	Employee findByEmpIdAndDelStatus(int empId,int i);
 	
+	Employee findByEmpCode(String code);
+	
 
 	@Transactional
 	@Modifying
@@ -36,5 +38,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer>{
 			+ "AND e.emp_id=:empId),'na') as dept_name",nativeQuery=true)
 	String getDeptNameByEmpId(@Param("empId") int empId);
 	
+
 	
 }

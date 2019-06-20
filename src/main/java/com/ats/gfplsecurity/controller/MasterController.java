@@ -937,4 +937,9 @@ public class MasterController {
 		return settingsRepository.findAll();
 	}
 
+	@PostMapping("/getSettingsByKey")
+	public Settings getSettingsByKey(@RequestParam("key") String key) {
+		return settingsRepository.findBySettingKey(key);
+	}
+
 }

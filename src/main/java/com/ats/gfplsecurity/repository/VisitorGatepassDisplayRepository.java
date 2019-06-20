@@ -49,7 +49,17 @@ public interface VisitorGatepassDisplayRepository extends JpaRepository<VisitorG
 			"    NULL\r\n" + 
 			"    ) AS security_out_name,\r\n" + 
 			"    p.purpose_heading,\r\n" + 
-			"    g.gate_name,\r\n" + 
+			"    COALESCE(\r\n" + 
+			"        (\r\n" + 
+			"        SELECT\r\n" + 
+			"                g.gate_name\r\n" + 
+			"        FROM\r\n" + 
+			"            m_gate g\r\n" + 
+			"        WHERE\r\n" + 
+			"            g.gate_id = v.gate_id\r\n" + 
+			"    ),\r\n" + 
+			"    NULL\r\n" + 
+			"    ) AS gate_name,\r\n" + 
 			"    COALESCE(\r\n" + 
 			"        (\r\n" + 
 			"        SELECT\r\n" + 
@@ -130,7 +140,17 @@ public interface VisitorGatepassDisplayRepository extends JpaRepository<VisitorG
 			"    NULL\r\n" + 
 			"    ) AS security_out_name,\r\n" + 
 			"    p.purpose_heading,\r\n" + 
-			"    g.gate_name,\r\n" + 
+			"    COALESCE(\r\n" + 
+			"        (\r\n" + 
+			"        SELECT\r\n" + 
+			"                g.gate_name\r\n" + 
+			"        FROM\r\n" + 
+			"            m_gate g\r\n" + 
+			"        WHERE\r\n" + 
+			"            g.gate_id = v.gate_id\r\n" + 
+			"    ),\r\n" + 
+			"    NULL\r\n" + 
+			"    ) AS gate_name,\r\n" + 
 			"    COALESCE(\r\n" + 
 			"        (\r\n" + 
 			"        SELECT\r\n" + 
@@ -198,7 +218,17 @@ public interface VisitorGatepassDisplayRepository extends JpaRepository<VisitorG
 			"    NULL\r\n" + 
 			"    ) AS security_out_name,\r\n" + 
 			"    p.purpose_heading,\r\n" + 
-			"    g.gate_name,\r\n" + 
+			"    COALESCE(\r\n" + 
+			"        (\r\n" + 
+			"        SELECT\r\n" + 
+			"                g.gate_name\r\n" + 
+			"        FROM\r\n" + 
+			"            m_gate g\r\n" + 
+			"        WHERE\r\n" + 
+			"            g.gate_id = v.gate_id\r\n" + 
+			"    ),\r\n" + 
+			"    NULL\r\n" + 
+			"    ) AS gate_name,\r\n" + 
 			"    COALESCE(\r\n" + 
 			"        (\r\n" + 
 			"        SELECT\r\n" + 
@@ -271,7 +301,17 @@ public interface VisitorGatepassDisplayRepository extends JpaRepository<VisitorG
 			"    NULL\r\n" + 
 			"    ) AS security_out_name,\r\n" + 
 			"    p.purpose_heading,\r\n" + 
-			"    g.gate_name,\r\n" + 
+			"    COALESCE(\r\n" + 
+			"        (\r\n" + 
+			"        SELECT\r\n" + 
+			"                g.gate_name\r\n" + 
+			"        FROM\r\n" + 
+			"            m_gate g\r\n" + 
+			"        WHERE\r\n" + 
+			"            g.gate_id = v.gate_id\r\n" + 
+			"    ),\r\n" + 
+			"    NULL\r\n" + 
+			"    ) AS gate_name,\r\n" + 
 			"    COALESCE(\r\n" + 
 			"        (\r\n" + 
 			"        SELECT\r\n" + 
@@ -346,7 +386,17 @@ public interface VisitorGatepassDisplayRepository extends JpaRepository<VisitorG
 			"    NULL\r\n" + 
 			"    ) AS security_out_name,\r\n" + 
 			"    p.purpose_heading,\r\n" + 
-			"    g.gate_name,\r\n" + 
+			"    COALESCE(\r\n" + 
+			"        (\r\n" + 
+			"        SELECT\r\n" + 
+			"                g.gate_name\r\n" + 
+			"        FROM\r\n" + 
+			"            m_gate g\r\n" + 
+			"        WHERE\r\n" + 
+			"            g.gate_id = v.gate_id\r\n" + 
+			"    ),\r\n" + 
+			"    NULL\r\n" + 
+			"    ) AS gate_name,\r\n" + 
 			"    COALESCE(\r\n" + 
 			"        (\r\n" + 
 			"        SELECT\r\n" + 

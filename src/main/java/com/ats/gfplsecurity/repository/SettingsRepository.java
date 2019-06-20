@@ -24,5 +24,7 @@ public interface SettingsRepository extends JpaRepository<Settings, Integer> {
 	
 	List<Settings> findAll();
 	
+	Settings findBySettingKey(String key);
+	
 
 }

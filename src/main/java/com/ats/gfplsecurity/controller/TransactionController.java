@@ -1444,7 +1444,7 @@ public class TransactionController {
 			System.err.println("UNIQUE CODE -----------------------------------------------------  "+emp);
 			
 			if(emp!=null) {
-				result="Yes";
+				result="Yes"; 
 				info.setError(true);
 				info.setMessage("yes");
 			}else {

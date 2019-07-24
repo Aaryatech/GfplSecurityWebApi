@@ -1,6 +1,7 @@
 package com.ats.gfplsecurity.controller;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ats.gfplsecurity.common.Firebase;
 import com.ats.gfplsecurity.common.Info;
 import com.ats.gfplsecurity.common.ResourceNotFoundException;
 import com.ats.gfplsecurity.model.Company;
@@ -31,6 +33,7 @@ import com.ats.gfplsecurity.model.Location;
 import com.ats.gfplsecurity.model.LocationDisplay;
 import com.ats.gfplsecurity.model.MaterialGatepass;
 import com.ats.gfplsecurity.model.Notification;
+import com.ats.gfplsecurity.model.OutwardGatepass;
 import com.ats.gfplsecurity.model.ProductionAccess;
 import com.ats.gfplsecurity.model.Purpose;
 import com.ats.gfplsecurity.model.PurposeDisplay;
@@ -53,6 +56,7 @@ import com.ats.gfplsecurity.repository.LocationDisplayRepo;
 import com.ats.gfplsecurity.repository.LocationRepo;
 import com.ats.gfplsecurity.repository.MaterialGatepassRepository;
 import com.ats.gfplsecurity.repository.NotificationRepository;
+import com.ats.gfplsecurity.repository.OutwardGatepassRepository;
 import com.ats.gfplsecurity.repository.ProductionAccessRepository;
 import com.ats.gfplsecurity.repository.PurposeDisplayRepository;
 import com.ats.gfplsecurity.repository.PurposeRepository;
@@ -131,6 +135,9 @@ public class MasterController {
 	@Autowired
 	EmployeeDisplayRepository employeeDisplayRepository;
 
+	@Autowired
+	OutwardGatepassRepository outwardGatepassRepository;
+
 	// --Get all Purposes--
 	@GetMapping("/allPurposes")
 	public List<Purpose> getAllPurposes() {
@@ -145,8 +152,8 @@ public class MasterController {
 
 	// --Get all Purposes by type--
 	@PostMapping("/getAllPurposesByType")
-	public List<Purpose> getAllPurposesByType(@RequestParam(value = "typeList") ArrayList<Integer> typeList) {
-		return purposeRepository.findByDelStatusAndPurposeTypeIn(1, typeList);
+	public List<PurposeDisplay> getAllPurposesByType(@RequestParam(value = "typeList") ArrayList<Integer> typeList) {
+		return purposeDisplayRepository.getAllPurposeListByType(typeList);
 	}
 
 	// --Save new Purpose--
@@ -212,20 +219,79 @@ public class MasterController {
 	// --Login Emp By Dsc No--
 	@PostMapping("/login")
 	public Employee login(@RequestParam(value = "dscNumber") String dscNumber) {
-		return employeeRepository.findByEmpDsc(dscNumber)
+		return employeeRepository.findByEmpDscAndDelStatus(dscNumber, 1)
 				.orElseThrow(() -> new ResourceNotFoundException("Employee", "Dsc Number", dscNumber));
 	}
+
+	/*
+	 * // --Login Emp By Dsc No--
+	 * 
+	 * @PostMapping("/login") public Employee login(@RequestParam(value =
+	 * "dscNumber") String dscNumber) { return
+	 * employeeRepository.findByEmpDsc(dscNumber); }
+	 */
 
 	// --Get all Employees--
 	@GetMapping("/allEmployees")
 	public List<Employee> getAllEmployees() {
-		return employeeRepository.findAllByDelStatus(1);
+		List<Employee> empList = null;
+
+		empList = employeeRepository.findAllByDelStatus(1);
+
+		if (empList == null) {
+			empList = new ArrayList();
+		}
+
+		return empList;
+	}
+
+	// --Get ADMIN, SUPERVISOR DESIGNATION Employees--
+	@GetMapping("/allEmployeesByDesg")
+	public List<Employee> getAllEmployeesByDesg() {
+
+		List<Employee> empList = null;
+
+		empList = employeeRepository.getAllEmpByDesg();
+
+		if (empList == null) {
+			empList = new ArrayList();
+		}
+
+		return empList;
+	}
+
+	// --Get Employees By Department--
+	@PostMapping("/allEmployeesByDept")
+	public List<Employee> getAllEmployeesByDept(@RequestParam(value = "deptId") List<Integer> deptId) {
+
+		List<Employee> empList = null;
+
+		if (deptId.contains(-1)) {
+			empList = employeeRepository.getAllEmp();
+		} else {
+			empList = employeeRepository.getAllEmpByDept(deptId);
+		}
+
+		if (empList == null) {
+			empList = new ArrayList();
+		}
+
+		return empList;
 	}
 
 	// --Get all Employees--
 	@GetMapping("/allEmployeeList")
 	public List<EmployeeDisplay> getAllEmployeeList() {
-		return employeeDisplayRepository.getAllEmpList();
+
+		List<EmployeeDisplay> empList = null;
+
+		empList = employeeDisplayRepository.getAllEmpList();
+
+		if (empList == null) {
+			empList = new ArrayList();
+		}
+
+		return empList;
 	}
 
 	// --Get all Supervisor Employees--
@@ -258,7 +324,15 @@ public class MasterController {
 	// --Get Employee By Id--
 	@PostMapping("/getEmployeeById")
 	public Employee getEmployeeById(@RequestParam(value = "empId") int empId) {
-		return employeeRepository.findByEmpIdAndDelStatus(empId, 1);
+
+		Employee emp = null;
+		emp = employeeRepository.findByEmpIdAndDelStatus(empId, 1);
+
+		if (emp == null) {
+			emp = new Employee();
+		}
+
+		return emp;
 	}
 
 	// --Delete Employee--
@@ -798,6 +872,12 @@ public class MasterController {
 		return visitCardRepository.findAllByDelStatus(1);
 	}
 
+	// --Get Available Visit Card--
+	@GetMapping("/allAvailableVisitCard")
+	public List<VisitCard> getAllAvailableVisitCard() {
+		return visitCardRepository.getAvailCard();
+	}
+
 	// --Get All Active Visit Card--
 	@GetMapping("/allActiveVisitCard")
 	public List<VisitCard> getAllActiveVisitCard() {
@@ -887,6 +967,34 @@ public class MasterController {
 
 	}
 
+	// -- Update App token
+	@RequestMapping(value = { "/updateDSC" }, method = RequestMethod.POST)
+	public @ResponseBody Info updateDSC(@RequestParam("empId") int empId, @RequestParam("dsc") String dsc) {
+
+		Info info = new Info();
+
+		try {
+			int res = employeeRepository.updateDsc(empId, dsc);
+
+			if (res == 1) {
+				info.setError(false);
+				info.setMessage("Success");
+			} else {
+				info.setError(true);
+				info.setMessage(" Failed");
+			}
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			info.setError(true);
+			info.setMessage("Failed");
+
+		}
+		return info;
+
+	}
+
 	// --Get all Location--
 	@GetMapping("/allLocation")
 	public List<Location> getAllLocation() {
@@ -940,6 +1048,138 @@ public class MasterController {
 	@PostMapping("/getSettingsByKey")
 	public Settings getSettingsByKey(@RequestParam("key") String key) {
 		return settingsRepository.findBySettingKey(key);
+	}
+
+	@PostMapping("/updateSettingsValueByKey")
+	public Info updateSettingsValue(@RequestParam("settingsId") int id, @RequestParam("value") String value) {
+		Info info = null;
+
+		try {
+
+			int updateRes = settingsRepository.updateValue(id, "" + value);
+
+			if (updateRes > 0) {
+				info = new Info();
+				info.setError(false);
+				info.setMessage("success");
+			} else {
+				info = new Info();
+				info.setError(true);
+				info.setMessage("Failed");
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			info = new Info();
+			info.setError(true);
+			info.setMessage("Failed");
+		}
+
+		return info;
+
+	}
+
+	// ----------------OUTWARD GATEPASS---------------------
+
+	// --Save Employee Gatepass--
+	@PostMapping("/saveOutwardGatepass")
+	public OutwardGatepass saveOutwardGatepass(@RequestBody OutwardGatepass outwardGatepass) {
+
+		OutwardGatepass result = null;
+
+		int id = outwardGatepass.getGpOutwardId();
+
+		try {
+			Settings settings = settingsRepository.findBySettingId(1);
+
+			outwardGatepass.setExVar1(settings.getSettingKey() + "" + settings.getSettingValue());
+
+			result = outwardGatepassRepository.save(outwardGatepass);
+
+
+			if (result != null) {
+				int val = Integer.parseInt(settings.getSettingValue());
+				int value = val + 1;
+				int updateRes = settingsRepository.updateValue(1, "" + value);
+
+				try {
+
+					if (id == 0) {
+
+						List<Employee> adminEmpList = new ArrayList();
+						adminEmpList = employeeRepository.findAllByDelStatusAndEmpCatId(1, 2);
+
+						if (adminEmpList.size() > 0) {
+
+							for (int i = 0; i < adminEmpList.size(); i++) {
+
+								System.err.println("NOTIFY------------------------------------------------------- "
+										+ adminEmpList.get(i).getEmpFname());
+
+								Employee emp = employeeRepository
+										.findByEmpIdAndDelStatus(adminEmpList.get(i).getEmpId(), 1);
+
+								if (emp.getExVar1() != null) {
+
+									try {
+									Firebase.sendPushNotifForCommunication(emp.getExVar1(),
+											"Outward Gatepass Notification",
+											"" + outwardGatepass.getEmpName() + " has generated outward gatepass for "
+													+ outwardGatepass.getOutwardName() + " which is delivered to "
+													+ outwardGatepass.getToName(),
+											"5");
+									}catch (Exception e) {
+										e.printStackTrace();
+									}
+									
+								}
+							}
+
+						}
+					}
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return result;
+	}
+
+	@PostMapping("/getOutwardGatepassById")
+	public OutwardGatepass getOutwardGatepassById(@RequestParam(value = "gpOutwardId") int gpOutwardId) {
+		OutwardGatepass result = null;
+		result = outwardGatepassRepository.findByGpOutwardId(gpOutwardId);
+		if (result == null) {
+			result = new OutwardGatepass();
+		}
+		return result;
+	}
+
+	// --Delete Employee Gatepass--
+	@PostMapping("/deleteOutwardGatepass")
+	public Info deleteOutwardGatepass(@RequestParam(value = "gpOutwardId") int gpOutwardId) {
+		Info info = null;
+
+		OutwardGatepass model = outwardGatepassRepository.findByGpOutwardId(gpOutwardId);
+
+		if (model != null) {
+			model.setDelStatus(0);
+			OutwardGatepass updatedModel = outwardGatepassRepository.save(model);
+			info = new Info();
+			info.setError(false);
+			info.setMessage("Success");
+		} else {
+			info = new Info();
+			info.setError(true);
+			info.setMessage("Failed");
+		}
+		return info;
 	}
 
 }

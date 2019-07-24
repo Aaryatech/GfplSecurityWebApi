@@ -1,21 +1,18 @@
 package com.ats.gfplsecurity.model.duty;
 
+import java.util.List;
+
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @Entity
-@Table(name="m_duty_header")
-public class DutyHeader {
-	
-	@Id	@GeneratedValue(strategy = GenerationType.AUTO)
+public class DutyHeaderDetailDisplay {
+
+	@Id
 	private int dutyId;
 	private String dutyCode;
 	private String dutyName;
@@ -34,6 +31,18 @@ public class DutyHeader {
 	private String exVar1;
 	private String exVar2;
 	private String exVar3;
+
+	private String deptName;
+	private String desgName;
+	private String shiftName;
+	private String shiftFromTime;
+	private String shiftToTime;
+	private String noOfHr;
+	private String createdByName;
+
+	@Transient
+	List<TaskDetailDisplay> taskDetailDisplay;
+
 	
-	
+
 }

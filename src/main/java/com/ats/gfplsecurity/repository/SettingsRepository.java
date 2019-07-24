@@ -26,5 +26,6 @@ public interface SettingsRepository extends JpaRepository<Settings, Integer> {
 	
 	Settings findBySettingKey(String key);
 	
-
+	
+	
 }

@@ -3,24 +3,16 @@ package com.ats.gfplsecurity.model.duty;
 import java.util.List;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Entity
-@Table(name="t_task_done_header")
-public class TaskDoneHeader {
+@Entity(name="task_done_header_display")
+public class TaskDoneHeaderDisplay {
 	
-	@Id	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Id
 	private int taskDoneHeaderId;
 	private String taskDate;
 	private int dutyId;
@@ -40,6 +32,15 @@ public class TaskDoneHeader {
 	private String exVar1;
 	private String exVar2;
 	private String exVar3;
+
+	private String dutyName;
+	private String shiftName;
+	private String shiftFromTime;
+	private String shiftToTime;
+	private String noOfHr;
+
 	
-	
+	@Transient
+	List<TaskDoneDetailDisplay> taskDoneDetailDisplayList;
+
 }

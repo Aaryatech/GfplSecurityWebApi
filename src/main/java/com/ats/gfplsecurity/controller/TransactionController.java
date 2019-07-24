@@ -1,6 +1,7 @@
 package com.ats.gfplsecurity.controller;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -30,6 +31,8 @@ import com.ats.gfplsecurity.model.MatGatepassEmpWiseCount;
 import com.ats.gfplsecurity.model.MaterialGatepass;
 import com.ats.gfplsecurity.model.MaterialGatepassDisplay;
 import com.ats.gfplsecurity.model.Notification;
+import com.ats.gfplsecurity.model.OutwardGatepass;
+import com.ats.gfplsecurity.model.OutwardGatepassDisplay;
 import com.ats.gfplsecurity.model.Purpose;
 import com.ats.gfplsecurity.model.Settings;
 import com.ats.gfplsecurity.model.SupGatepassCount;
@@ -48,6 +51,8 @@ import com.ats.gfplsecurity.repository.MatGatepassEmpWiseCountRepo;
 import com.ats.gfplsecurity.repository.MaterialGatepassDisplayRepo;
 import com.ats.gfplsecurity.repository.MaterialGatepassRepository;
 import com.ats.gfplsecurity.repository.NotificationRepository;
+import com.ats.gfplsecurity.repository.OutwardGatepassDisplayRepo;
+import com.ats.gfplsecurity.repository.OutwardGatepassRepository;
 import com.ats.gfplsecurity.repository.PurposeRepository;
 import com.ats.gfplsecurity.repository.SettingsRepository;
 import com.ats.gfplsecurity.repository.SupGatepassCountRepo;
@@ -114,6 +119,12 @@ public class TransactionController {
 	@Autowired
 	MatGatepassEmpWiseCountRepo matGatepassEmpWiseCountRepo;
 
+	@Autowired
+	OutwardGatepassDisplayRepo outwardGatepassDisplayRepo;
+
+	@Autowired
+	OutwardGatepassRepository outwardGatepassRepository;
+
 	@PostMapping("/getVisitorGatepassListInDate")
 	public @ResponseBody List<VisitorGatepassDisplay> getVisitorGatepassListInDate(
 			@RequestParam(value = "fromDate") String fromDate, @RequestParam(value = "toDate") String toDate,
@@ -158,6 +169,21 @@ public class TransactionController {
 				resultList = visitorGatepassDisplayRepository.getVisitorGatepassListInDate(fromDate, toDate,
 						gatepassType, empIds, status);
 
+			}
+
+			if (resultList != null) {
+				if (resultList.size() > 0) {
+					for (int i = 0; i < resultList.size(); i++) {
+
+						List<Notification> notifyList = null;
+						notifyList = notificationRepository
+								.findByGatepassVisitorIdAndDelStatus(resultList.get(i).getGatepassVisitorId(), 1);
+
+						resultList.get(i).setNotificationList(notifyList);
+
+					}
+
+				}
 			}
 
 		} catch (Exception e) {
@@ -276,71 +302,127 @@ public class TransactionController {
 	@PostMapping("/saveGatepassVisitor")
 	public Visitor saveVisitor(@RequestBody Visitor visitor) {
 
+		System.err.println("PARAMETER---------------------------- " + visitor);
+		int id = visitor.getGatepassVisitorId();
+
 		Visitor result = null;
 
 		try {
+			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+			Calendar cal = Calendar.getInstance();
 
 			Settings settings = settingsRepository.findBySettingId(1);
 
 			visitor.setExVar1(settings.getSettingKey() + "" + settings.getSettingValue());
+			visitor.setInTime(sdf.format(cal.getTimeInMillis()));
 
 			result = visitorRepository.save(visitor);
 
-			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-			Calendar cal = Calendar.getInstance();
+			if (visitor.getGatepassVisitorId() > 0 && visitor.getVisitStatus() == 4) {
 
-			visitor.setInTime(sdf.format(cal.getTimeInMillis()));
+				Employee secEmpIn = employeeRepository.findByEmpIdAndDelStatus(visitor.getSecurityIdIn(), 1);
+				Employee secEmpOut = employeeRepository.findByEmpIdAndDelStatus(visitor.getSecurityIdOut(), 1);
 
-			if (result != null) {
+				String type = "";
+				if (visitor.getGatePasstype() == 1) {
+					type = "Visitor";
+				} else {
+					type = "Maintenance";
+				}
 
-				int val = Integer.parseInt(settings.getSettingValue());
-				int value = val + 1;
-				int updateRes = settingsRepository.updateValue(1, "" + value);
+				if (secEmpIn == secEmpOut) {
 
-				String empIds = result.getEmpIds();
+					try {
+						Firebase.sendPushNotifForCommunication(secEmpIn.getExVar1(),
+								"" + type + " " + visitor.getPersonName() + " (" + visitor.getPersonCompany()
+										+ ") Meeting Closed.",
+								"" + visitor.getPersonName() + " (" + visitor.getPersonCompany() + ") Meeting Closed.",
+								"" + result.getGatePasstype());
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 
-				List<Integer> empIdList = Stream.of(empIds.split(",")).map(Integer::parseInt)
-						.collect(Collectors.toList());
+				} else {
 
-				if (empIdList.size() > 0) {
-					for (int i = 0; i < empIdList.size(); i++) {
+					try {
+						Firebase.sendPushNotifForCommunication(secEmpIn.getExVar1(),
+								"" + type + " " + visitor.getPersonName() + " (" + visitor.getPersonCompany()
+										+ ") Meeting Closed.",
+								"" + visitor.getPersonName() + " (" + visitor.getPersonCompany() + ") Meeting Closed.",
+								"" + result.getGatePasstype());
 
-						Employee emp = employeeRepository.findByEmpIdAndDelStatus(empIdList.get(i), 1);
-						Purpose purpose = purposeRepository.findByPurposeId(result.getPurposeId());
-
-						Notification notification = new Notification(0, result.getGatepassVisitorId(), empIdList.get(i),
-								emp.getEmpFname() + " " + emp.getEmpMname() + " " + emp.getEmpSname(),
-								result.getGatePasstype(), purpose.getPurposeType(), result.getPurposeId(), "", 0, 0, 1,
-								1, 0, 0, 0, "na", "na", "na");
-
-						Notification savedModel = notificationRepository.save(notification);
-
-						try {
-
-							if (savedModel != null) {
-
-								String token = emp.getExVar1();
-
-								String type = "";
-								if (result.getGatePasstype() == 1) {
-									type = "Visitor";
-								} else {
-									type = "Maintenance";
-								}
-
-								Firebase.sendPushNotifForCommunication(token, "" + type + " Gatepass",
-										"" + result.getPersonName() + " wants to visit. Please take action on this.",
-										"" + result.getGatePasstype());
-
-							}
-
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-
+						Firebase.sendPushNotifForCommunication(secEmpOut.getExVar1(),
+								"" + type + " " + visitor.getPersonName() + " (" + visitor.getPersonCompany()
+										+ ") Meeting Closed.",
+								"" + visitor.getPersonName() + " (" + visitor.getPersonCompany() + ") Meeting Closed.",
+								"" + result.getGatePasstype());
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
 				}
 
+			}
+
+			System.err.println("VISITOR GP ID--------------------------------------------------- " + id);
+			if (id == 0) {
+				if (result != null) {
+
+					int val = Integer.parseInt(settings.getSettingValue());
+					int value = val + 1;
+					int updateRes = settingsRepository.updateValue(1, "" + value);
+
+					String empIds = result.getEmpIds();
+
+					List<Integer> empIdList = Stream.of(empIds.split(",")).map(Integer::parseInt)
+							.collect(Collectors.toList());
+
+					if (empIdList.size() > 0) {
+						for (int i = 0; i < empIdList.size(); i++) {
+
+							Employee emp = employeeRepository.findByEmpIdAndDelStatus(empIdList.get(i), 1);
+							Purpose purpose = purposeRepository.findByPurposeId(result.getPurposeId());
+
+							Notification notification = new Notification(0, result.getGatepassVisitorId(),
+									empIdList.get(i),
+									emp.getEmpFname() + " " + emp.getEmpMname() + " " + emp.getEmpSname(),
+									result.getGatePasstype(), purpose.getPurposeType(), result.getPurposeId(), "", 0, 0,
+									1, 1, 0, 0, 0, "na", "na", "na");
+
+							Notification savedModel = notificationRepository.save(notification);
+
+							try {
+
+								if (savedModel != null) {
+
+									String token = emp.getExVar1();
+
+									String type = "";
+									if (result.getGatePasstype() == 1) {
+										type = "Visitor";
+									} else {
+										type = "Maintenance";
+									}
+
+									try {
+
+										Firebase.sendPushNotifForCommunication(token, "" + type + " Gatepass",
+												"" + result.getPersonName()
+														+ " wants to visit. Please take action on this.",
+												"" + result.getGatePasstype());
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
+
+								}
+
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+
+						}
+					}
+
+				}
 			}
 
 		} catch (Exception e) {
@@ -391,13 +473,17 @@ public class TransactionController {
 							type = "Maintenance";
 						}
 
-						Firebase.sendPushNotifForCommunication(securityEmp.getExVar1(),
-								"" + type + " Gatepass for " + visitor.getPersonName() + " from "
-										+ visitor.getPersonCompany() + " has Rejected",
-								"" + visitor.getPersonName() + " from " + visitor.getPersonCompany()
-										+ " company, gatepass has Rejected by " + emp.getEmpFname() + " "
-										+ emp.getEmpMname() + " " + emp.getEmpSname(),
-								"" + visitor.getGatePasstype());
+						try {
+							Firebase.sendPushNotifForCommunication(securityEmp.getExVar1(),
+									"" + type + " Gatepass for " + visitor.getPersonName() + " from "
+											+ visitor.getPersonCompany() + " has Rejected",
+									"" + visitor.getPersonName() + " from " + visitor.getPersonCompany()
+											+ " company, gatepass has Rejected by " + emp.getEmpFname() + " "
+											+ emp.getEmpMname() + " " + emp.getEmpSname(),
+									"" + visitor.getGatePasstype());
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -790,6 +876,48 @@ public class TransactionController {
 
 				DocumentHandover doc = documentHandoverRepository.save(docHandover);
 
+				try {
+
+					if (materialGatepass.getGatepassInwardId() == 0) {
+
+						List<Employee> adminEmpList = new ArrayList();
+						adminEmpList = employeeRepository.findAllByDelStatusAndEmpCatId(1, 2);
+
+						if (adminEmpList.size() > 0) {
+
+							for (int i = 0; i < adminEmpList.size(); i++) {
+
+								Employee emp1 = employeeRepository
+										.findByEmpIdAndDelStatus(adminEmpList.get(i).getEmpId(), 1);
+
+								Firebase.sendPushNotifForCommunication(adminEmpList.get(i).getExVar1(),
+										"Inward Gatepass Notification",
+										"" + materialGatepass.getPartyName() + " has delivered material to "
+												+ materialGatepass.getToEmpName() + " on "
+												+ materialGatepass.getInwardDate(),
+										"8");
+
+							}
+
+						}
+					}
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+				try {
+					Employee emp2 = employeeRepository.findByEmpIdAndDelStatus(materialGatepass.getToEmpId(), 1);
+
+					Firebase.sendPushNotifForCommunication(emp2.getExVar1(), "Inward Gatepass Notification",
+							"" + materialGatepass.getPartyName() + " has delivered the material on "
+									+ materialGatepass.getInwardDate(),
+							"8");
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
 			}
 
 		} catch (Exception e) {
@@ -1158,6 +1286,11 @@ public class TransactionController {
 			inTime = sdfTime.format(cal.getTimeInMillis());
 			date = sdfDate.format(cal.getTimeInMillis());
 
+			Calendar cal1 = Calendar.getInstance();
+			cal1.setTime(new Date());
+			cal1.add(Calendar.HOUR_OF_DAY, 2);
+			inTime = sdfTime.format(cal1.getTimeInMillis());
+
 			d1 = sdfTime.parse(outTime);
 			d2 = sdfTime.parse(inTime);
 
@@ -1190,15 +1323,21 @@ public class TransactionController {
 
 					Employee emp = employeeRepository.findByEmpIdAndDelStatus(gp.getEmpId(), 1);
 
-					
 					Employee supEmp = employeeRepository.findByEmpIdAndDelStatus(gp.getUserId(), 1);
-					
-					SimpleDateFormat sdf=new SimpleDateFormat("dd/MM/yyyy hh:mm a");
 
-					Firebase.sendPushNotifForCommunication(
-							supEmp.getExVar1(), emp.getEmpFname()+" "+emp.getEmpMname()+" "+emp.getEmpSname()+" is Out of the factory",
-							emp.getEmpFname()+" "+emp.getEmpMname()+" "+emp.getEmpSname()+" is Out of the factory on "+sdf.format(Calendar.getInstance().getTimeInMillis()),
-							"3");
+					SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
+
+					try {
+						Firebase.sendPushNotifForCommunication(supEmp.getExVar1(),
+								emp.getEmpFname() + " " + emp.getEmpMname() + " " + emp.getEmpSname()
+										+ " is Out of the factory",
+								emp.getEmpFname() + " " + emp.getEmpMname() + " " + emp.getEmpSname()
+										+ " is Out of the factory on "
+										+ sdf.format(Calendar.getInstance().getTimeInMillis()),
+								"3");
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -1222,27 +1361,32 @@ public class TransactionController {
 
 					info.setError(false);
 					info.setMessage("Updated Successfully");
-					
+
 					try {
 
 						EmpGatepass gp = empGatepassRepository.findByGatepassEmpId(gatepassEmpId);
 
 						Employee emp = employeeRepository.findByEmpIdAndDelStatus(gp.getEmpId(), 1);
 
-						
 						Employee supEmp = employeeRepository.findByEmpIdAndDelStatus(gp.getUserId(), 1);
-						
-						SimpleDateFormat sdf=new SimpleDateFormat("dd/MM/yyyy hh:mm a");
 
-						Firebase.sendPushNotifForCommunication(
-								supEmp.getExVar1(), emp.getEmpFname()+" "+emp.getEmpMname()+" "+emp.getEmpSname()+" is Out of the factory",
-								emp.getEmpFname()+" "+emp.getEmpMname()+" "+emp.getEmpSname()+" is Out of the factory on "+sdf.format(Calendar.getInstance().getTimeInMillis()),
-								"3");
+						SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
+
+						try {
+							Firebase.sendPushNotifForCommunication(supEmp.getExVar1(),
+									emp.getEmpFname() + " " + emp.getEmpMname() + " " + emp.getEmpSname()
+											+ " is Out of the factory",
+									emp.getEmpFname() + " " + emp.getEmpMname() + " " + emp.getEmpSname()
+											+ " is Out of the factory on "
+											+ sdf.format(Calendar.getInstance().getTimeInMillis()),
+									"3");
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-
 
 				} else {
 
@@ -1285,27 +1429,32 @@ public class TransactionController {
 
 					info.setError(false);
 					info.setMessage("Updated Successfully");
-					
+
 					try {
 
 						EmpGatepass gp = empGatepassRepository.findByGatepassEmpId(gatepassEmpId);
 
 						Employee emp = employeeRepository.findByEmpIdAndDelStatus(gp.getEmpId(), 1);
 
-						
 						Employee supEmp = employeeRepository.findByEmpIdAndDelStatus(gp.getUserId(), 1);
-						
-						SimpleDateFormat sdf=new SimpleDateFormat("dd/MM/yyyy hh:mm a");
 
-						Firebase.sendPushNotifForCommunication(
-								supEmp.getExVar1(), emp.getEmpFname()+" "+emp.getEmpMname()+" "+emp.getEmpSname()+" is back to the factory",
-								emp.getEmpFname()+" "+emp.getEmpMname()+" "+emp.getEmpSname()+" is back to the factory on "+sdf.format(Calendar.getInstance().getTimeInMillis()),
-								"3");
+						SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
+
+						try {
+							Firebase.sendPushNotifForCommunication(supEmp.getExVar1(),
+									emp.getEmpFname() + " " + emp.getEmpMname() + " " + emp.getEmpSname()
+											+ " is back to the factory",
+									emp.getEmpFname() + " " + emp.getEmpMname() + " " + emp.getEmpSname()
+											+ " is back to the factory on "
+											+ sdf.format(Calendar.getInstance().getTimeInMillis()),
+									"3");
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-
 
 				} else {
 
@@ -1344,9 +1493,13 @@ public class TransactionController {
 					type = "Maintenance";
 				}
 
-				Firebase.sendPushNotifForCommunication(token, "" + type + " Gatepass",
-						"" + visitor.getPersonName() + " wants to visit. Please take action on this.",
-						"" + visitor.getGatePasstype());
+				try {
+					Firebase.sendPushNotifForCommunication(token, "" + type + " Gatepass",
+							"" + visitor.getPersonName() + " wants to visit. Please take action on this.",
+							"" + visitor.getGatePasstype());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 
 				info.setError(false);
 				info.setMessage("Notification Sent Successfully");
@@ -1425,37 +1578,31 @@ public class TransactionController {
 
 		return dashResult;
 	}
-	
-	
-	
-	
-	//---------------UNIQUE EMP CODE----------------
-	
-	@PostMapping("/checkUniqueEmpCode")
-	public @ResponseBody Info checkUniqueEmpCode(
-			@RequestParam(value = "code") String code) {
 
-		String  result = null;
+	// ---------------UNIQUE EMP CODE----------------
+
+	@PostMapping("/checkUniqueEmpCode")
+	public @ResponseBody Info checkUniqueEmpCode(@RequestParam(value = "code") String code) {
+
+		String result = null;
 		Info info = new Info();
 
 		try {
 
-			Employee emp=employeeRepository.findByEmpCode(code);
-			System.err.println("UNIQUE CODE -----------------------------------------------------  "+emp);
-			
-			if(emp!=null) {
-				result="Yes"; 
+			Employee emp = employeeRepository.findByEmpCode(code);
+			System.err.println("UNIQUE CODE -----------------------------------------------------  " + emp);
+
+			if (emp != null) {
+				result = "Yes";
 				info.setError(true);
 				info.setMessage("yes");
-			}else {
-				result="No";
+			} else {
+				result = "No";
 				info.setError(false);
 				info.setMessage("no");
 			}
-			
-			
-			System.err.println("UNIQUE CODE --------------------RESULT---------------------------------  "+result);
-			
+
+			System.err.println("UNIQUE CODE --------------------RESULT---------------------------------  " + result);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1464,6 +1611,360 @@ public class TransactionController {
 		return info;
 
 	}
-	
+
+	// ---------------UNIQUE EMP DSC----------------
+
+	@PostMapping("/checkUniqueEmpDSC")
+	public @ResponseBody Info checkUniqueEmpDSC(@RequestParam(value = "dsc") String dsc) {
+
+		String result = null;
+		Info info = new Info();
+
+		try {
+
+			Employee emp = employeeRepository.findByEmpDsc(dsc);
+			System.err.println("UNIQUE DSC -----------------------------------------------------  " + emp);
+
+			if (emp != null) {
+				result = "Yes";
+				info.setError(true);
+				info.setMessage("yes");
+			} else {
+				result = "No";
+				info.setError(false);
+				info.setMessage("no");
+			}
+
+			System.err.println("UNIQUE DSC --------------------RESULT---------------------------------  " + result);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return info;
+
+	}
+
+	// ---------------UNIQUE EMP DSC LIST----------------
+
+	@PostMapping("/checkUniqueEmpDSCList")
+	public @ResponseBody Info checkUniqueEmpDSCList(@RequestParam(value = "dsc") String dsc) {
+
+		String result = null;
+		Info info = new Info();
+
+		try {
+
+			List<Employee> empList = new ArrayList<>();
+			empList = employeeRepository.findAllByEmpDsc(dsc);
+			System.err.println("UNIQUE DSC -----------------------------------------------------  " + empList);
+
+			if (empList.size() > 1) {
+				result = "Yes";
+				info.setError(true);
+				info.setMessage("yes");
+			} else {
+				result = "No";
+				info.setError(false);
+				info.setMessage("no");
+			}
+
+			System.err.println("UNIQUE DSC --------------------RESULT---------------------------------  " + result);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return info;
+
+	}
+
+	// ---------------UNIQUE EMP CODE LIST----------------
+
+	@PostMapping("/checkUniqueEmpCodeList")
+	public @ResponseBody Info checkUniqueEmpCodeList(@RequestParam(value = "code") String code) {
+
+		String result = null;
+		Info info = new Info();
+
+		try {
+			List<Employee> empList = new ArrayList<>();
+			empList = employeeRepository.findAllByEmpCode(code);
+			System.err.println("UNIQUE CODE -----------------------------------------------------  " + empList);
+
+			if (empList.size() > 1) {
+				result = "Yes";
+				info.setError(true);
+				info.setMessage("yes");
+			} else {
+				result = "No";
+				info.setError(false);
+				info.setMessage("no");
+			}
+
+			System.err.println("UNIQUE CODE --------------------RESULT---------------------------------  " + result);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return info;
+
+	}
+
+	// ----------------------OUTWARD GATEPASS LIST----------------
+
+	@PostMapping("/getOutwardGatepassListByDate")
+	public @ResponseBody List<OutwardGatepassDisplay> getOutwardGPListByDate(
+			@RequestParam(value = "fromDate") String fromDate, @RequestParam(value = "toDate") String toDate,
+			@RequestParam(value = "empId") List<Integer> empId, @RequestParam(value = "status") List<Integer> status) {
+
+		List<OutwardGatepassDisplay> resultList = null;
+
+		try {
+
+			if (status.contains(-1)) {
+				status.clear();
+				status.add(0);
+				status.add(1);
+				status.add(2);
+			}
+
+			if (empId.contains(-1)) {
+
+				resultList = outwardGatepassDisplayRepo.getOutwardGatepassListByDate(fromDate, toDate, status);
+
+			} else if (!empId.contains(-1)) {
+
+				resultList = outwardGatepassDisplayRepo.getOutwardGatepassListByEmpAndDate(fromDate, toDate, empId,
+						status);
+
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return resultList;
+
+	}
+
+	@PostMapping("/getOutwardGatepassList")
+	public @ResponseBody List<OutwardGatepassDisplay> getOutwardGatepassList(
+			@RequestParam(value = "empId") List<Integer> empId, @RequestParam(value = "status") List<Integer> status) {
+
+		List<OutwardGatepassDisplay> resultList = null;
+
+		try {
+
+			if (status.contains(-1)) {
+				status.clear();
+				status.add(0);
+				status.add(1);
+				status.add(2);
+			}
+
+			if (empId.contains(-1)) {
+
+				resultList = outwardGatepassDisplayRepo.getOutwardGatepassList(status);
+
+			} else if (!empId.contains(-1)) {
+
+				resultList = outwardGatepassDisplayRepo.getOutwardGatepassListByEmp(empId, status);
+
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return resultList;
+
+	}
+
+	// --Update outward gatepass status
+	@PostMapping("/updateOutwardGatepassStatus")
+	public @ResponseBody Info updateOutwardGatepassStatus(@RequestParam("gpOutwardId") int gpOutwardId,
+			@RequestParam("secId") int secId, @RequestParam("status") int status, @RequestParam("photo") String photo) {
+
+		Info info = new Info();
+
+		try {
+
+			OutwardGatepass outGatepass = outwardGatepassRepository.findByGpOutwardId(gpOutwardId);
+
+			List<Employee> adminEmpList = new ArrayList();
+			adminEmpList = employeeRepository.findAllByDelStatusAndEmpCatId(1, 2);
+
+			Employee supEmp = employeeRepository.findByEmpIdAndDelStatus(outGatepass.getEmpId(), 1);
+
+			SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
+			SimpleDateFormat sdf2 = new SimpleDateFormat("hh:mm");
+			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
+
+			String time = sdf2.format(Calendar.getInstance().getTimeInMillis());
+			String date = sdf1.format(Calendar.getInstance().getTimeInMillis());
+
+			if (status == 2) {
+
+				int res = outwardGatepassRepository.updateInStatus(secId, time, date, photo, gpOutwardId);
+
+				if (res > 0) {
+					info.setError(false);
+					info.setMessage("Success");
+
+					try {
+
+						Employee secEmp = employeeRepository.findByEmpIdAndDelStatus(outGatepass.getSecIdIn(), 1);
+
+						try {
+							Firebase.sendPushNotifForCommunication(supEmp.getExVar1(), "Outward Gatepass Notification",
+									"" + outGatepass.getOutwardName() + " is received by " + secEmp.getEmpFname() + " "
+											+ secEmp.getEmpMname() + " " + secEmp.getEmpSname() + " security person on "
+											+ sdf.format(Calendar.getInstance().getTimeInMillis()),
+									"5");
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+
+						if (adminEmpList.size() > 0) {
+
+							for (int i = 0; i < adminEmpList.size(); i++) {
+
+								Employee emp = employeeRepository
+										.findByEmpIdAndDelStatus(adminEmpList.get(i).getEmpId(), 1);
+
+								try {
+									Firebase.sendPushNotifForCommunication(adminEmpList.get(i).getExVar1(),
+											"Outward Gatepass Notification",
+											"" + outGatepass.getOutwardName() + " is received by "
+													+ secEmp.getEmpFname() + " " + secEmp.getEmpMname() + " "
+													+ secEmp.getEmpSname() + " security person on "
+													+ sdf.format(Calendar.getInstance().getTimeInMillis()),
+											"5");
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+								
+							}
+
+						}
+
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
+				} else {
+					info.setError(true);
+					info.setMessage("failed");
+				}
+
+			} else if (status == 1) {
+
+				int res = outwardGatepassRepository.updateOutStatus(secId, time, photo, gpOutwardId);
+
+				if (res > 0) {
+					info.setError(false);
+					info.setMessage("Success");
+
+					try {
+
+						Employee secEmp = employeeRepository.findByEmpIdAndDelStatus(outGatepass.getSecIdOut(), 1);
+
+						Firebase.sendPushNotifForCommunication(supEmp.getExVar1(), "Outward Gatepass Notification",
+								"" + outGatepass.getOutwardName() + " is Out of the factory and delivered to "
+										+ outGatepass.getToName() + " by " + secEmp.getEmpFname() + " "
+										+ secEmp.getEmpMname() + " " + secEmp.getEmpSname() + " security person on "
+										+ sdf.format(Calendar.getInstance().getTimeInMillis()),
+								"5");
+
+						if (adminEmpList.size() > 0) {
+
+							for (int i = 0; i < adminEmpList.size(); i++) {
+
+								Employee emp = employeeRepository
+										.findByEmpIdAndDelStatus(adminEmpList.get(i).getEmpId(), 1);
+
+								Firebase.sendPushNotifForCommunication(adminEmpList.get(i).getExVar1(),
+										"Outward Gatepass Notification",
+										"" + outGatepass.getOutwardName() + " is Out of the factory and delivered to "
+												+ outGatepass.getToName() + " by " + secEmp.getEmpFname() + " "
+												+ secEmp.getEmpMname() + " " + secEmp.getEmpSname()
+												+ " security person on "
+												+ sdf.format(Calendar.getInstance().getTimeInMillis()),
+										"5");
+
+							}
+
+						}
+
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
+				} else {
+					info.setError(true);
+					info.setMessage("failed");
+				}
+
+			} else if (status == 0) {
+
+				int res = outwardGatepassRepository.updateStatus(status, gpOutwardId);
+
+				if (res > 0) {
+					info.setError(false);
+					info.setMessage("Success");
+
+					/*
+					 * try {
+					 * 
+					 * Employee secEmp =
+					 * employeeRepository.findByEmpIdAndDelStatus(outGatepass.getSecIdOut(), 1);
+					 * 
+					 * Firebase.sendPushNotifForCommunication(supEmp.getExVar1(),
+					 * "Outward Gatepass Notification", "" + outGatepass.getOutwardName() +
+					 * " is Out of the factory and delivered to " + outGatepass.getToName() + " by "
+					 * + secEmp.getEmpFname() + " " + secEmp.getEmpMname() + " " +
+					 * secEmp.getEmpSname() + " security person on " +
+					 * sdf.format(Calendar.getInstance().getTimeInMillis()), "5");
+					 * 
+					 * if (adminEmpList.size() > 0) {
+					 * 
+					 * for (int i = 0; i < adminEmpList.size(); i++) {
+					 * 
+					 * Employee emp = employeeRepository
+					 * .findByEmpIdAndDelStatus(adminEmpList.get(i).getEmpId(), 1);
+					 * 
+					 * Firebase.sendPushNotifForCommunication(adminEmpList.get(i).getExVar1(),
+					 * "Outward Gatepass Notification", "" + outGatepass.getOutwardName() +
+					 * " is Out of the factory and delivered to " + outGatepass.getToName() + " by "
+					 * + secEmp.getEmpFname() + " " + secEmp.getEmpMname() + " " +
+					 * secEmp.getEmpSname() + " security person on " +
+					 * sdf.format(Calendar.getInstance().getTimeInMillis()), "5");
+					 * 
+					 * }
+					 * 
+					 * }
+					 * 
+					 * } catch (Exception e) { e.printStackTrace(); }
+					 */
+
+				} else {
+					info.setError(true);
+					info.setMessage("failed");
+				}
+
+			}
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			info.setError(true);
+			info.setMessage("failed");
+		}
+
+		return info;
+
+	}
 
 }

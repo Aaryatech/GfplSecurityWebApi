@@ -16,7 +16,7 @@ import com.ats.gfplsecurity.model.Purpose;
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Integer>{
 
-	Optional<Employee> findByEmpDsc(String dscNumber);
+	Optional<Employee> findByEmpDscAndDelStatus(String dscNumber,int del);
 
 	List<Employee> findAllByDelStatus(int i);
 	
@@ -25,6 +25,11 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer>{
 	Employee findByEmpIdAndDelStatus(int empId,int i);
 	
 	Employee findByEmpCode(String code);
+	
+	Employee findByEmpDsc(String dsc);
+	
+	List<Employee> findAllByEmpCode(String code);
+	List<Employee> findAllByEmpDsc(String dsc);
 	
 
 	@Transactional
@@ -37,6 +42,33 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer>{
 			+ "WHERE e.emp_dept_id=d.emp_dept_id AND e.del_status=1 AND d.del_status=1 "
 			+ "AND e.emp_id=:empId),'na') as dept_name",nativeQuery=true)
 	String getDeptNameByEmpId(@Param("empId") int empId);
+	
+	
+	@Transactional
+	@Modifying
+	@Query("update Employee set emp_dsc=:dsc  WHERE emp_id=:empId")
+	int updateDsc(@Param("empId") int empId,@Param("dsc") String dsc);
+	
+
+	@Query(value="SELECT e.* FROM emp_info e, m_emp_department d, m_emp_category c, m_emp_type t, m_company cp WHERE "
+			+ "e.emp_dept_id = d.emp_dept_id AND e.emp_cat_id = c.emp_cat_id AND e.emp_type_id = t.emp_type_id "
+			+ "AND e.company_id = cp.company_id AND e.del_status = 1 AND e.emp_cat_id IN( SELECT s.setting_value "
+			+ "FROM t_settings s WHERE s.setting_id IN(2, 3) )",nativeQuery=true)
+	List<Employee> getAllEmpByDesg();
+	
+	
+	@Query(value="SELECT e.* FROM emp_info e, m_emp_department d, m_emp_category c, m_emp_type t, m_company cp "
+			+ "WHERE e.emp_dept_id = d.emp_dept_id AND e.emp_cat_id = c.emp_cat_id AND e.emp_type_id = t.emp_type_id "
+			+ "AND e.company_id = cp.company_id AND e.del_status = 1",nativeQuery=true)
+	List<Employee> getAllEmp();
+
+	@Query(value="SELECT e.* FROM emp_info e, m_emp_department d, m_emp_category c, m_emp_type t, m_company cp "
+			+ "WHERE e.emp_dept_id = d.emp_dept_id AND e.emp_cat_id = c.emp_cat_id AND e.emp_type_id = t.emp_type_id "
+			+ "AND e.company_id = cp.company_id AND e.del_status = 1 AND e.emp_dept_id IN(:deptId)",nativeQuery=true)
+	List<Employee> getAllEmpByDept(@Param("deptId") List<Integer> deptId);
+
+
+	
 	
 
 	

@@ -1,21 +1,17 @@
 package com.ats.gfplsecurity.model.duty;
 
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Table;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Entity
-@Table(name="t_task_done_detail")
-public class TaskDoneDetail {
+@Entity(name="task_done_detail_display")
+public class TaskDoneDetailDisplay {
 
 	@Id	@GeneratedValue(strategy = GenerationType.AUTO)
 	private int taskDoneDetailId;
@@ -40,6 +36,15 @@ public class TaskDoneDetail {
 	private String exVar1;
 	private String exVar2;
 	private String exVar3;
+	
+	private String taskNameEng;
+	private String taskNameMar;
+	private String taskNameHin;
+	private String taskDescEng;
+	private String taskDescMar;
+	private String taskDescHin;
+	private int photoReq;
+	private int remarkReq;
 	
 	
 }

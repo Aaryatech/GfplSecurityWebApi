@@ -15,7 +15,8 @@ public interface EmpGatepassDisplayRepo extends JpaRepository<EmpGatepassDisplay
 	@Query(value = " SELECT eg.*,e.emp_dept_id,d.emp_dept_name,e.emp_type_id,t.emp_type_name  FROM t_emp_gatepass eg,emp_info e,"
 			+ " m_emp_department d, m_emp_type t  WHERE eg.del_status=1 AND eg.emp_date_out BETWEEN :fromDate AND :toDate "
 			+ "AND eg.gate_pass_status IN (:status) AND eg.user_id=e.emp_id AND e.emp_dept_id=d.emp_dept_id "
-			+ "AND d.emp_dept_id IN (:deptIds) AND FIND_IN_SET(eg.user_id,:empIds) AND e.emp_type_id=t.emp_type_id AND e.del_status=1 AND d.del_status=1 AND t.del_status=1 ", nativeQuery = true)
+			+ "AND d.emp_dept_id IN (:deptIds) AND FIND_IN_SET(eg.user_id,:empIds) AND e.emp_type_id=t.emp_type_id AND e.del_status=1 "
+			+ "AND d.del_status=1 AND t.del_status=1 ORDER BY eg.gatepass_emp_id DESC", nativeQuery = true)
 	List<EmpGatepassDisplay> getEmpGPListByDateByDeptByEmpByStatus(
 			@Param("fromDate") String fromDate,
 			@Param("toDate") String toDate,
@@ -28,7 +29,7 @@ public interface EmpGatepassDisplayRepo extends JpaRepository<EmpGatepassDisplay
 	@Query(value = " SELECT eg.*,e.emp_dept_id,d.emp_dept_name,e.emp_type_id,t.emp_type_name  FROM t_emp_gatepass eg,emp_info e,"
 			+ " m_emp_department d, m_emp_type t   WHERE eg.del_status=1 AND eg.emp_date_out BETWEEN :fromDate AND :toDate "
 			+ "AND eg.gate_pass_status IN (:status) AND eg.user_id=e.emp_id AND e.emp_dept_id=d.emp_dept_id "
-			+ "AND FIND_IN_SET(eg.user_id,:empIds)  AND e.emp_type_id=t.emp_type_id AND e.del_status=1 AND d.del_status=1 AND t.del_status=1 ", nativeQuery = true)
+			+ "AND FIND_IN_SET(eg.user_id,:empIds)  AND e.emp_type_id=t.emp_type_id AND e.del_status=1 AND d.del_status=1 AND t.del_status=1 ORDER BY eg.gatepass_emp_id DESC", nativeQuery = true)
 	List<EmpGatepassDisplay> getEmpGPListByDateByEmpByStatus(
 			@Param("fromDate") String fromDate,
 			@Param("toDate") String toDate,
@@ -39,7 +40,7 @@ public interface EmpGatepassDisplayRepo extends JpaRepository<EmpGatepassDisplay
 	@Query(value = " SELECT eg.*,e.emp_dept_id,d.emp_dept_name,e.emp_type_id,t.emp_type_name  FROM t_emp_gatepass eg,emp_info e,"
 			+ " m_emp_department d, m_emp_type t  WHERE eg.del_status=1 AND eg.emp_date_out BETWEEN :fromDate AND :toDate "
 			+ "AND eg.gate_pass_status IN (:status) AND eg.user_id=e.emp_id AND e.emp_dept_id=d.emp_dept_id "
-			+ "AND d.emp_dept_id IN (:deptIds)  AND e.emp_type_id=t.emp_type_id AND e.del_status=1 AND d.del_status=1 AND t.del_status=1 ", nativeQuery = true)
+			+ "AND d.emp_dept_id IN (:deptIds)  AND e.emp_type_id=t.emp_type_id AND e.del_status=1 AND d.del_status=1 AND t.del_status=1 ORDER BY eg.gatepass_emp_id DESC", nativeQuery = true)
 	List<EmpGatepassDisplay> getEmpGPListByDateByDeptByStatus(
 			@Param("fromDate") String fromDate,
 			@Param("toDate") String toDate,
@@ -50,7 +51,7 @@ public interface EmpGatepassDisplayRepo extends JpaRepository<EmpGatepassDisplay
 	@Query(value = " SELECT eg.*,e.emp_dept_id,d.emp_dept_name,e.emp_type_id,t.emp_type_name  FROM t_emp_gatepass eg,emp_info e,"
 			+ " m_emp_department d, m_emp_type t  WHERE eg.del_status=1 AND eg.emp_date_out BETWEEN :fromDate AND :toDate "
 			+ "AND eg.gate_pass_status IN (:status) AND eg.user_id=e.emp_id AND e.emp_dept_id=d.emp_dept_id "
-			+ "AND e.emp_type_id=t.emp_type_id AND e.del_status=1 AND d.del_status=1 AND t.del_status=1 ", nativeQuery = true)
+			+ "AND e.emp_type_id=t.emp_type_id AND e.del_status=1 AND d.del_status=1 AND t.del_status=1 ORDER BY eg.gatepass_emp_id DESC", nativeQuery = true)
 	List<EmpGatepassDisplay> getEmpGPListByDateByStatus(
 			@Param("fromDate") String fromDate,
 			@Param("toDate") String toDate,

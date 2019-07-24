@@ -95,7 +95,7 @@ public interface VisitorGatepassDisplayRepository extends JpaRepository<VisitorG
 			+ " AND v.`del_status` = 1 AND v.gate_id = g.gate_id AND v.purpose_id = p.purpose_id"
 			+ " AND v.visit_status IN(:status) AND FIND_IN_SET(emp.emp_id, v.emp_ids)\r\n" + 
 			"GROUP BY\r\n" + 
-			"    v.gatepass_visitor_id", nativeQuery = true)
+			"    v.gatepass_visitor_id ORDER BY v.gatepass_visitor_id DESC", nativeQuery = true)
 	List<VisitorGatepassDisplay> getVisitorGatepassListInDate(@Param("fromDate") String fromDate,
 			@Param("toDate") String toDate,
 			@Param("gatepassType") List<Integer> gatepassType,
@@ -176,7 +176,7 @@ public interface VisitorGatepassDisplayRepository extends JpaRepository<VisitorG
 			"WHERE\r\n" + 
 			"    v.visit_date_in BETWEEN :fromDate AND :toDate AND v.gate_passtype IN(:gatepassType) "
 			+ "AND v.`del_status` = 1 AND v.gate_id = g.gate_id AND v.purpose_id = p.purpose_id "
-			+ "AND v.visit_status IN(:status)", nativeQuery = true)
+			+ "AND v.visit_status IN(:status) ORDER BY v.gatepass_visitor_id DESC", nativeQuery = true)
 	List<VisitorGatepassDisplay> getVisitorGatepassListInDate(@Param("fromDate") String fromDate,
 			@Param("toDate") String toDate,
 			@Param("gatepassType") List<Integer> gatepassType,
@@ -261,7 +261,7 @@ public interface VisitorGatepassDisplayRepository extends JpaRepository<VisitorG
 			"WHERE\r\n" + 
 			"     v.gate_passtype IN(:gatepassType) AND v.`del_status` = 1 AND v.gate_id = g.gate_id AND v.purpose_id = p.purpose_id AND v.visit_status IN(:status) AND FIND_IN_SET(emp.emp_id, v.emp_ids)\r\n" + 
 			"GROUP BY\r\n" + 
-			"    v.gatepass_visitor_id", nativeQuery = true)
+			"    v.gatepass_visitor_id ORDER BY v.gatepass_visitor_id DESC", nativeQuery = true)
 	List<VisitorGatepassDisplay> getVisitorGatepassList(
 			@Param("gatepassType") List<Integer> gatepassType,
 			@Param("empIds") String empIds,
@@ -342,7 +342,7 @@ public interface VisitorGatepassDisplayRepository extends JpaRepository<VisitorG
 			"        del_status = 1 AND FIND_IN_SET(emp_info.emp_id,:empIds)\r\n" + 
 			") AS emp\r\n" + 
 			"WHERE\r\n" + 
-			"     v.gate_passtype IN(:gatepassType) AND v.`del_status` = 1 AND v.gate_id = g.gate_id AND v.purpose_id = p.purpose_id AND v.visit_status IN(:status)", nativeQuery = true)
+			"     v.gate_passtype IN(:gatepassType) AND v.`del_status` = 1 AND v.gate_id = g.gate_id AND v.purpose_id = p.purpose_id AND v.visit_status IN(:status) ORDER BY v.gatepass_visitor_id DESC", nativeQuery = true)
 	List<VisitorGatepassDisplay> getVisitorGatepassList(
 			@Param("gatepassType") List<Integer> gatepassType,
 			@Param("status") List<Integer> status);   

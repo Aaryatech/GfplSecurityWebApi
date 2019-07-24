@@ -1,5 +1,6 @@
 package com.ats.gfplsecurity.repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -38,6 +39,11 @@ public interface PurposeDisplayRepository extends JpaRepository<PurposeDisplay, 
 			"WHERE\r\n" + 
 			"    p.del_status = 1", nativeQuery = true)
 	List<PurposeDisplay> getAllPurposeList(); 
+	
+	@Query(value = " SELECT p.*, COALESCE( ( SELECT GROUP_CONCAT(' ', e.emp_fname, ' ', e.emp_mname, ' ', e.emp_sname) "
+			+ "FROM emp_info e WHERE FIND_IN_SET(e.emp_id, p.emp_id) ), 'na' ) AS assign_emp_name "
+			+ "FROM m_purpose p WHERE p.del_status = 1 AND p.purpose_type IN(:typeList)", nativeQuery = true)
+	List<PurposeDisplay> getAllPurposeListByType(@Param("typeList") ArrayList<Integer> typeList); 
 	
 
 }

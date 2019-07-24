@@ -12,7 +12,7 @@ public interface TaskDoneDetailDisplayRepo extends JpaRepository<TaskDoneDetailD
 
 	@Query(value = "SELECT td.*,t.task_name_eng,t.task_name_mar,t.task_name_hin,t.task_desc_eng,t.task_desc_mar,"
 			+ "t.task_desc_hin,t.photo_req,t.remark_req FROM t_task_done_detail td,m_task_detail t "
-			+ "WHERE t.del_status=1 AND t.task_id=td.task_id AND td.task_done_header_id=:headerId ", nativeQuery = true)
+			+ "WHERE t.del_status=1 AND t.task_id=td.task_id AND td.task_done_header_id=:headerId Order By td.task_weight desc", nativeQuery = true)
 	List<TaskDoneDetailDisplay> getTaskDoneDetailById(@Param("headerId") int headerId);
 
 }

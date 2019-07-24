@@ -20,6 +20,6 @@ public interface TaskDetailRepo extends JpaRepository<TaskDetail, Integer> {
 	@Query(value = "SELECT COALESCE((SELECT SUM(t.task_weight) from m_task_detail t WHERE t.del_status=1 AND t.duty_id=:dutyId),0) as total ", nativeQuery = true)
 	float getSumOfTaskWt(@Param("dutyId") int dutyId);   
 	
-	List<TaskDetail> findAllByDelStatusAndDutyId(int i,int dutyId);
+	List<TaskDetail> findAllByDelStatusAndDutyIdOrderByTaskWeightDesc(int i,int dutyId);
 
 }

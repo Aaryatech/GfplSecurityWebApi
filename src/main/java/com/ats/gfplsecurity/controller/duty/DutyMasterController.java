@@ -97,6 +97,8 @@ public class DutyMasterController {
 
 	@Autowired
 	DutyWiseCountRepo dutyWiseCountRepo;
+	
+	
 
 	// -----------------------DUTY CRUD------------------------------------
 
@@ -386,7 +388,7 @@ public class DutyMasterController {
 
 		List<TaskDetail> detailList = null;
 
-		detailList = taskDetailRepo.findAllByDelStatusAndDutyId(1, dutyId);
+		detailList = taskDetailRepo.findAllByDelStatusAndDutyIdOrderByTaskWeightDesc(1, dutyId);
 
 		if (detailList == null) {
 			detailList = new ArrayList();

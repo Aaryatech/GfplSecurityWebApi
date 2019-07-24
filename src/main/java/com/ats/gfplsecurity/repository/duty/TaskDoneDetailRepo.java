@@ -45,5 +45,10 @@ public interface TaskDoneDetailRepo extends JpaRepository<TaskDoneDetail, Intege
 	@Modifying
 	@Query("update TaskDoneDetail set task_status=:status  WHERE task_done_detail_id=:detailId")
 	int updateTask(@Param("detailId") int detailId, @Param("status") int status);
+	
+	@Transactional
+	@Modifying
+	@Query("update TaskDoneDetail set ex_int2=1  WHERE task_done_detail_id=:detailId")
+	int updateTaskNotifyStatus(@Param("detailId") int detailId);
 
 }

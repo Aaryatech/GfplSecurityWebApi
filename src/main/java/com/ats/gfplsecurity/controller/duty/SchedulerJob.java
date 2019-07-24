@@ -19,6 +19,7 @@ import com.ats.gfplsecurity.model.duty.Shift;
 import com.ats.gfplsecurity.model.duty.TaskDetail;
 import com.ats.gfplsecurity.model.duty.TaskDoneDetail;
 import com.ats.gfplsecurity.model.duty.TaskDoneHeader;
+import com.ats.gfplsecurity.model.duty.TaskNotification;
 import com.ats.gfplsecurity.repository.EmployeeRepository;
 import com.ats.gfplsecurity.repository.duty.AssignDutyRepo;
 import com.ats.gfplsecurity.repository.duty.DutyHeaderRepo;
@@ -26,6 +27,7 @@ import com.ats.gfplsecurity.repository.duty.ShiftRepo;
 import com.ats.gfplsecurity.repository.duty.TaskDetailRepo;
 import com.ats.gfplsecurity.repository.duty.TaskDoneDetailRepo;
 import com.ats.gfplsecurity.repository.duty.TaskDoneHeaderRepo;
+import com.ats.gfplsecurity.repository.duty.TaskNotificationRepo;
 
 @Component
 public class SchedulerJob {
@@ -50,6 +52,10 @@ public class SchedulerJob {
 
 	@Autowired
 	EmployeeRepository employeeRepository;
+	
+	@Autowired
+	TaskNotificationRepo taskNotificationRepo;
+	
 
 	private static SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -143,7 +149,7 @@ public class SchedulerJob {
 											}
 
 											List<TaskDetail> taskDetail = null;
-											taskDetail = taskDetailRepo.findAllByDelStatusAndDutyId(1,
+											taskDetail = taskDetailRepo.findAllByDelStatusAndDutyIdOrderByTaskWeightDesc(1,
 													duty.getDutyId());
 
 											if (taskDetail != null) {
@@ -155,8 +161,8 @@ public class SchedulerJob {
 															taskDetail.get(k).getTaskId(),
 															taskDetail.get(k).getTaskNameEng(),
 															taskDetail.get(k).getTaskDescEng(), strDate, "", "", "", "",
-															"", "", taskDetail.get(k).getTaskWeight(), 0, 1, 0, 0, 0,
-															"", "", "");
+															"", "", taskDetail.get(k).getTaskWeight(), 0, 1, taskDetail.get(k).getExInt1(), 0, 0,
+															taskDetail.get(k).getExVar1(), "", "");
 
 													TaskDoneDetail taskRes = taskDoneDetailRepo.save(taskDoneDetail);
 													System.out.println(
@@ -285,7 +291,7 @@ public class SchedulerJob {
 												}
 
 												List<TaskDetail> taskDetail = null;
-												taskDetail = taskDetailRepo.findAllByDelStatusAndDutyId(1,
+												taskDetail = taskDetailRepo.findAllByDelStatusAndDutyIdOrderByTaskWeightDesc(1,
 														duty.getDutyId());
 
 												if (taskDetail != null) {
@@ -297,8 +303,8 @@ public class SchedulerJob {
 																taskDetail.get(k).getTaskId(),
 																taskDetail.get(k).getTaskNameEng(),
 																taskDetail.get(k).getTaskDescEng(), strDate, "", "", "",
-																"", "", "", taskDetail.get(k).getTaskWeight(), 0, 1, 0,
-																0, 0, "", "", "");
+																"", "", "", taskDetail.get(k).getTaskWeight(), 0, 1, taskDetail.get(k).getExInt1(),
+																0, 0, taskDetail.get(k).getExVar1(), "", "");
 
 														TaskDoneDetail taskRes = taskDoneDetailRepo
 																.save(taskDoneDetail);
@@ -427,7 +433,7 @@ public class SchedulerJob {
 												}
 
 												List<TaskDetail> taskDetail = null;
-												taskDetail = taskDetailRepo.findAllByDelStatusAndDutyId(1,
+												taskDetail = taskDetailRepo.findAllByDelStatusAndDutyIdOrderByTaskWeightDesc(1,
 														duty.getDutyId());
 
 												if (taskDetail != null) {
@@ -439,8 +445,8 @@ public class SchedulerJob {
 																taskDetail.get(k).getTaskId(),
 																taskDetail.get(k).getTaskNameEng(),
 																taskDetail.get(k).getTaskDescEng(), strDate, "", "", "",
-																"", "", "", taskDetail.get(k).getTaskWeight(), 0, 1, 0,
-																0, 0, "", "", "");
+																"", "", "", taskDetail.get(k).getTaskWeight(), 0, 1,taskDetail.get(k).getExInt1(),
+																0, 0, taskDetail.get(k).getExVar1(), "", "");
 
 														TaskDoneDetail taskRes = taskDoneDetailRepo
 																.save(taskDoneDetail);
@@ -561,9 +567,6 @@ public class SchedulerJob {
 					Date d1 = timeFormat.parse(shift.getShiftFromTime());
 					String dispTime = sdfTime.format(d1);
 
-					
-					
-
 					Date date = timeFormat.parse(shift.getShiftFromTime());
 					Calendar cal = Calendar.getInstance();
 					cal.setTime(date);
@@ -580,10 +583,6 @@ public class SchedulerJob {
 					
 					Calendar currTime=Calendar.getInstance();
 					
-					
-					
-					
-
 					if (duty != null) {
 
 						if (duty.getType() == 1) {// Daily Basis
@@ -617,7 +616,7 @@ public class SchedulerJob {
 										}
 									}*/
 									
-									if (currTime.getTime().after(cal1.getTime()) && currTime.getTime().after(cal.getTime())) {
+									if (currTime.getTime().after(cal1.getTime()) && currTime.getTime().before(cal.getTime())) {
 										
 										System.err.println("CURR TIME - "+currTime.getTime()+"-------  SHIFT - "+cal.getTime()+" ------------- 15 MIN BEFOR - "+cal1.getTime());
 
@@ -677,7 +676,7 @@ public class SchedulerJob {
 
 										}*/
 										
-										if (currTime.getTime().after(cal1.getTime()) && currTime.getTime().after(cal.getTime())) {
+										if (currTime.getTime().after(cal1.getTime()) && currTime.getTime().before(cal.getTime())) {
 											
 											System.err.println("CURR TIME - "+currTime.getTime()+"-------  SHIFT - "+cal.getTime()+" ------------- 15 MIN BEFOR - "+cal1.getTime());
 
@@ -738,7 +737,7 @@ public class SchedulerJob {
 
 										}*/
 										
-										if (currTime.getTime().after(cal1.getTime()) && currTime.getTime().after(cal.getTime())) {
+										if (currTime.getTime().after(cal1.getTime()) && currTime.getTime().before(cal.getTime())) {
 											
 											System.err.println("CURR TIME - "+currTime.getTime()+"-------  SHIFT - "+cal.getTime()+" ------------- 15 MIN BEFOR - "+cal1.getTime());
 
@@ -770,6 +769,88 @@ public class SchedulerJob {
 		}
 
 	}
+	
+	
+	
+	
+	
+	// -----------------------------------------------------------------------
+
+		@Scheduled(cron = "1 * * * * *")
+		public void sendTaskNotification() {
+
+			String strTime = timeFormat.format(new Date());
+			String strDate = dateFormat.format(new Date());
+
+			SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss a");
+
+			System.out.println(
+					" CRON JOB ----------------------------------------------------------------------------------------------------  "
+							+ sdf.format(Calendar.getInstance().getTimeInMillis()));
+
+			List<TaskNotification> notifyTaskList = null;
+			
+			
+
+			try {
+
+
+				notifyTaskList = taskNotificationRepo.getTaskForNotify(strDate);
+				
+			
+				
+				if(notifyTaskList!=null) {
+					
+					for(int i=0;i<notifyTaskList.size();i++) {
+						
+						Date date = timeFormat.parse(notifyTaskList.get(i).getTime());
+						Calendar cal = Calendar.getInstance();
+						cal.setTime(date);
+						
+						Calendar cal1 = Calendar.getInstance();
+						cal1.setTime(date);
+						cal1.add(Calendar.MINUTE, -10);
+
+						Calendar currTime=Calendar.getInstance();
+						
+						
+						if (currTime.getTime().after(cal1.getTime()) && currTime.getTime().before(cal.getTime())){
+							
+							try {
+								
+								String time="";
+								SimpleDateFormat sdfTime=new SimpleDateFormat("hh:mm a");
+								Date d=timeFormat.parse(notifyTaskList.get(i).getTime());
+								time=sdfTime.format(d.getTime());
+								
+								Firebase.sendPushNotifForCommunication(notifyTaskList.get(i).getToken(), "Task Reminder",
+										"You have to start the task " + notifyTaskList.get(i).getTaskName()+" on "+time, "10");
+								
+								int result = taskDoneDetailRepo.updateTaskNotifyStatus(notifyTaskList.get(i).getTaskDoneDetailId());
+								
+							}catch (Exception e) {
+								e.printStackTrace();
+							}
+							
+						}
+						
+					}
+					
+				}
+				
+
+				
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		}
+		
+		
+		
+		
+	
 	
 	
 

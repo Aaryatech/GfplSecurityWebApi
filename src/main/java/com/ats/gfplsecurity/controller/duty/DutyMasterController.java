@@ -18,6 +18,10 @@ import com.ats.gfplsecurity.model.duty.AssignDutyEmployee;
 import com.ats.gfplsecurity.model.duty.DeptWiseCount;
 import com.ats.gfplsecurity.model.duty.DutyHeader;
 import com.ats.gfplsecurity.model.duty.DutyHeaderDetailDisplay;
+import com.ats.gfplsecurity.model.duty.DutyReport;
+import com.ats.gfplsecurity.model.duty.DutyReportData;
+import com.ats.gfplsecurity.model.duty.DutyReportDutyList;
+import com.ats.gfplsecurity.model.duty.DutyReportTask;
 import com.ats.gfplsecurity.model.duty.DutyWiseCount;
 import com.ats.gfplsecurity.model.duty.EmpWiseCount;
 import com.ats.gfplsecurity.model.duty.SaveDutyAndTask;
@@ -36,6 +40,7 @@ import com.ats.gfplsecurity.repository.duty.AssignDutyRepo;
 import com.ats.gfplsecurity.repository.duty.DeptWiseCountRepo;
 import com.ats.gfplsecurity.repository.duty.DutyHeaderDetailDisplayRepo;
 import com.ats.gfplsecurity.repository.duty.DutyHeaderRepo;
+import com.ats.gfplsecurity.repository.duty.DutyReportRepo;
 import com.ats.gfplsecurity.repository.duty.DutyWiseCountRepo;
 import com.ats.gfplsecurity.repository.duty.ShiftRepo;
 import com.ats.gfplsecurity.repository.duty.TaskDetailDisplayRepo;
@@ -97,8 +102,9 @@ public class DutyMasterController {
 
 	@Autowired
 	DutyWiseCountRepo dutyWiseCountRepo;
-	
-	
+
+	@Autowired
+	DutyReportRepo dutyReportRepo;
 
 	// -----------------------DUTY CRUD------------------------------------
 
@@ -842,6 +848,258 @@ public class DutyMasterController {
 		if (result == null) {
 			result = new ArrayList();
 		}
+
+		return result;
+	}
+
+	// get duty Report
+	@PostMapping("/getDutyReportByEmp")
+	public List<DutyReportData> getDutyReportByEmp(@RequestParam(value = "empId") int empId) {
+		List<DutyReportData> result = new ArrayList<>();
+
+		List<DutyReport> reportData = dutyReportRepo.getDutyReportByEmpId(empId);
+		System.err.println("REPORT ------------------ " + reportData);
+
+		if (reportData != null) {
+
+			DutyReportData dailyData = new DutyReportData();
+			dailyData.setType(1);
+			dailyData.setDutyType("Daily Basis");
+			
+			DutyReportData dayData = new DutyReportData();
+			dayData.setType(2);
+			dayData.setDutyType("Day Basis");
+			
+			DutyReportData dateData = new DutyReportData();
+			dateData.setType(3);
+			dateData.setDutyType("Date Basis");
+
+			ArrayList<Integer> dailyDutyId = new ArrayList<>();
+			ArrayList<Integer> dayDutyId = new ArrayList<>();
+			ArrayList<Integer> dateDutyId = new ArrayList<>();
+
+			ArrayList<DutyReportDutyList> dailyDutyList = new ArrayList<DutyReportDutyList>();
+			ArrayList<DutyReportDutyList> dayDutyList = new ArrayList<DutyReportDutyList>();
+			ArrayList<DutyReportDutyList> dateDutyList = new ArrayList<DutyReportDutyList>();
+
+			for (int i = 0; i < reportData.size(); i++) {
+
+				if (reportData.get(i).getType() == 1) {
+
+					if (!dailyDutyId.contains(reportData.get(i).getDutyId())) {
+						dailyDutyId.add(reportData.get(i).getDutyId());
+					}
+
+				} else if (reportData.get(i).getType() == 2) {
+
+					if (!dayDutyId.contains(reportData.get(i).getDutyId())) {
+						dayDutyId.add(reportData.get(i).getDutyId());
+					}
+
+				} else if (reportData.get(i).getType() == 3) {
+
+					if (!dateDutyId.contains(reportData.get(i).getDutyId())) {
+						dateDutyId.add(reportData.get(i).getDutyId());
+					}
+
+				}
+
+			}
+
+			for (int j = 0; j < dailyDutyId.size(); j++) {
+
+				for (int i = 0; i < reportData.size(); i++) {
+
+					if (reportData.get(i).getType() == 1 && reportData.get(i).getDutyId() == dailyDutyId.get(j)) {
+
+						DutyReportDutyList duty = new DutyReportDutyList();
+						duty.setDutyId(reportData.get(i).getDutyId());
+						duty.setDutyName(reportData.get(i).getDutyName());
+						duty.setType(reportData.get(i).getType());
+						duty.setTypeDesc(reportData.get(i).getTypeDesc());
+						duty.setTotalTaskWt(reportData.get(i).getTotalTaskWt());
+						duty.setShiftId(reportData.get(i).getShiftId());
+						duty.setShiftName(reportData.get(i).getShiftName());
+						duty.setShiftFromTime(reportData.get(i).getShiftFromTime());
+						duty.setShiftToTime(reportData.get(i).getShiftToTime());
+
+						ArrayList<Integer> taskIds = new ArrayList<>();
+						List<DutyReportTask> taskList = new ArrayList<>();
+
+						for (int k = 0; k < reportData.size(); k++) {
+
+							if (reportData.get(k).getType() == 1
+									&& reportData.get(k).getDutyId() == dailyDutyId.get(j)) {
+
+								if (!taskIds.contains(reportData.get(k).getTaskId())) {
+
+									taskIds.add(reportData.get(k).getTaskId());
+
+									DutyReportTask task = new DutyReportTask();
+									task.setTaskId(reportData.get(k).getTaskId());
+									task.setTaskNameEng(reportData.get(k).getTaskNameEng());
+									task.setTaskDescEng(reportData.get(k).getTaskDescEng());
+									task.setTaskWeight(reportData.get(k).getTaskWeight());
+									task.setPhotoReq(reportData.get(k).getPhotoReq());
+									task.setRemarkReq(reportData.get(k).getRemarkReq());
+									task.setTimeReq(reportData.get(k).getTimeReq());
+									task.setTaskTime(reportData.get(k).getTaskTime());
+
+									taskList.add(task);
+
+								}
+
+							}
+
+						}
+
+						duty.setTaskList(taskList);
+
+						dailyDutyList.add(duty);
+
+						break;
+
+					}
+
+				}
+
+			}
+			
+			dailyData.setDutyList(dailyDutyList);
+			result.add(dailyData);
+			
+			//-------------DAY BASIS-----------------------
+			
+			for (int j = 0; j < dayDutyId.size(); j++) {
+
+				for (int i = 0; i < reportData.size(); i++) {
+
+					if (reportData.get(i).getType() == 2 && reportData.get(i).getDutyId() == dayDutyId.get(j)) {
+
+						DutyReportDutyList duty = new DutyReportDutyList();
+						duty.setDutyId(reportData.get(i).getDutyId());
+						duty.setDutyName(reportData.get(i).getDutyName());
+						duty.setType(reportData.get(i).getType());
+						duty.setTypeDesc(reportData.get(i).getTypeDesc());
+						duty.setTotalTaskWt(reportData.get(i).getTotalTaskWt());
+						duty.setShiftId(reportData.get(i).getShiftId());
+						duty.setShiftName(reportData.get(i).getShiftName());
+						duty.setShiftFromTime(reportData.get(i).getShiftFromTime());
+						duty.setShiftToTime(reportData.get(i).getShiftToTime());
+
+						ArrayList<Integer> taskIds = new ArrayList<>();
+						List<DutyReportTask> taskList = new ArrayList<>();
+
+						for (int k = 0; k < reportData.size(); k++) {
+
+							if (reportData.get(k).getType() == 2
+									&& reportData.get(k).getDutyId() == dayDutyId.get(j)) {
+
+								if (!taskIds.contains(reportData.get(k).getTaskId())) {
+
+									taskIds.add(reportData.get(k).getTaskId());
+
+									DutyReportTask task = new DutyReportTask();
+									task.setTaskId(reportData.get(k).getTaskId());
+									task.setTaskNameEng(reportData.get(k).getTaskNameEng());
+									task.setTaskDescEng(reportData.get(k).getTaskDescEng());
+									task.setTaskWeight(reportData.get(k).getTaskWeight());
+									task.setPhotoReq(reportData.get(k).getPhotoReq());
+									task.setRemarkReq(reportData.get(k).getRemarkReq());
+									task.setTimeReq(reportData.get(k).getTimeReq());
+									task.setTaskTime(reportData.get(k).getTaskTime());
+
+									taskList.add(task);
+
+								}
+
+							}
+
+						}
+
+						duty.setTaskList(taskList);
+
+						dayDutyList.add(duty);
+
+						break;
+
+					}
+
+				}
+
+			}
+			
+			dayData.setDutyList(dayDutyList);
+			result.add(dayData);
+			
+			//--------------DATE BASIS---------------------------------
+			
+			for (int j = 0; j < dateDutyId.size(); j++) {
+
+				for (int i = 0; i < reportData.size(); i++) {
+
+					if (reportData.get(i).getType() == 3 && reportData.get(i).getDutyId() == dateDutyId.get(j)) {
+
+						DutyReportDutyList duty = new DutyReportDutyList();
+						duty.setDutyId(reportData.get(i).getDutyId());
+						duty.setDutyName(reportData.get(i).getDutyName());
+						duty.setType(reportData.get(i).getType());
+						duty.setTypeDesc(reportData.get(i).getTypeDesc());
+						duty.setTotalTaskWt(reportData.get(i).getTotalTaskWt());
+						duty.setShiftId(reportData.get(i).getShiftId());
+						duty.setShiftName(reportData.get(i).getShiftName());
+						duty.setShiftFromTime(reportData.get(i).getShiftFromTime());
+						duty.setShiftToTime(reportData.get(i).getShiftToTime());
+
+						ArrayList<Integer> taskIds = new ArrayList<>();
+						List<DutyReportTask> taskList = new ArrayList<>();
+
+						for (int k = 0; k < reportData.size(); k++) {
+
+							if (reportData.get(k).getType() == 3
+									&& reportData.get(k).getDutyId() == dateDutyId.get(j)) {
+
+								if (!taskIds.contains(reportData.get(k).getTaskId())) {
+
+									taskIds.add(reportData.get(k).getTaskId());
+
+									DutyReportTask task = new DutyReportTask();
+									task.setTaskId(reportData.get(k).getTaskId());
+									task.setTaskNameEng(reportData.get(k).getTaskNameEng());
+									task.setTaskDescEng(reportData.get(k).getTaskDescEng());
+									task.setTaskWeight(reportData.get(k).getTaskWeight());
+									task.setPhotoReq(reportData.get(k).getPhotoReq());
+									task.setRemarkReq(reportData.get(k).getRemarkReq());
+									task.setTimeReq(reportData.get(k).getTimeReq());
+									task.setTaskTime(reportData.get(k).getTaskTime());
+
+									taskList.add(task);
+
+								}
+
+							}
+
+						}
+
+						duty.setTaskList(taskList);
+
+						dateDutyList.add(duty);
+
+						break;
+
+					}
+
+				}
+
+			}
+			
+			dateData.setDutyList(dateDutyList);
+			result.add(dateData);
+			
+
+		}
+
+		
 
 		return result;
 	}

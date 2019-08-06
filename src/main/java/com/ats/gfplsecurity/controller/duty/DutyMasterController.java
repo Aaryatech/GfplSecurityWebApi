@@ -854,10 +854,22 @@ public class DutyMasterController {
 
 	// get duty Report
 	@PostMapping("/getDutyReportByEmp")
-	public List<DutyReportData> getDutyReportByEmp(@RequestParam(value = "empId") int empId) {
+	public List<DutyReportData> getDutyReportByEmp(@RequestParam(value = "empId") int empId,@RequestParam(value = "langId") int langId) {
 		List<DutyReportData> result = new ArrayList<>();
 
-		List<DutyReport> reportData = dutyReportRepo.getDutyReportByEmpId(empId);
+		List<DutyReport> reportData=new ArrayList<>();
+		
+		if(langId==1) {
+			reportData = dutyReportRepo.getDutyReportByEmpIdEng(empId);
+		}else if(langId==2) {
+			reportData = dutyReportRepo.getDutyReportByEmpIdMar(empId);
+		}else if(langId==3) {
+			reportData = dutyReportRepo.getDutyReportByEmpIdHin(empId);
+		}else {
+			reportData = dutyReportRepo.getDutyReportByEmpIdEng(empId);
+		} 
+		
+		//List<DutyReport> reportData = dutyReportRepo.getDutyReportByEmpId(empId);
 		System.err.println("REPORT ------------------ " + reportData);
 
 		if (reportData != null) {

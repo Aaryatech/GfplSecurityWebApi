@@ -881,7 +881,7 @@ public class TransactionController {
 					if (materialGatepass.getGatepassInwardId() == 0) {
 
 						List<Employee> adminEmpList = new ArrayList();
-						adminEmpList = employeeRepository.findAllByDelStatusAndEmpCatId(1, 2);
+						adminEmpList = employeeRepository.findAllByDelStatusAndEmpCatIdOrderByEmpFname(1, 2);
 
 						if (adminEmpList.size() > 0) {
 
@@ -1656,7 +1656,7 @@ public class TransactionController {
 		try {
 
 			List<Employee> empList = new ArrayList<>();
-			empList = employeeRepository.findAllByEmpDsc(dsc);
+			empList = employeeRepository.findAllByEmpDscOrderByEmpFname(dsc);
 			System.err.println("UNIQUE DSC -----------------------------------------------------  " + empList);
 
 			if (empList.size() > 1) {
@@ -1689,7 +1689,7 @@ public class TransactionController {
 
 		try {
 			List<Employee> empList = new ArrayList<>();
-			empList = employeeRepository.findAllByEmpCode(code);
+			empList = employeeRepository.findAllByEmpCodeOrderByEmpFname(code);
 			System.err.println("UNIQUE CODE -----------------------------------------------------  " + empList);
 
 			if (empList.size() > 1) {
@@ -1794,7 +1794,7 @@ public class TransactionController {
 			OutwardGatepass outGatepass = outwardGatepassRepository.findByGpOutwardId(gpOutwardId);
 
 			List<Employee> adminEmpList = new ArrayList();
-			adminEmpList = employeeRepository.findAllByDelStatusAndEmpCatId(1, 2);
+			adminEmpList = employeeRepository.findAllByDelStatusAndEmpCatIdOrderByEmpFname(1, 2);
 
 			Employee supEmp = employeeRepository.findByEmpIdAndDelStatus(outGatepass.getEmpId(), 1);
 

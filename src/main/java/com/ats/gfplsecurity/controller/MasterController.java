@@ -236,7 +236,7 @@ public class MasterController {
 	public List<Employee> getAllEmployees() {
 		List<Employee> empList = null;
 
-		empList = employeeRepository.findAllByDelStatus(1);
+		empList = employeeRepository.findAllByDelStatusOrderByEmpFname(1);
 
 		if (empList == null) {
 			empList = new ArrayList();
@@ -304,7 +304,7 @@ public class MasterController {
 		try {
 
 			if (settings != null) {
-				result = employeeRepository.findAllByDelStatusAndEmpCatId(1,
+				result = employeeRepository.findAllByDelStatusAndEmpCatIdOrderByEmpFname(1,
 						Integer.parseInt(settings.getSettingValue()));
 			}
 
@@ -1107,7 +1107,7 @@ public class MasterController {
 					if (id == 0) {
 
 						List<Employee> adminEmpList = new ArrayList();
-						adminEmpList = employeeRepository.findAllByDelStatusAndEmpCatId(1, 2);
+						adminEmpList = employeeRepository.findAllByDelStatusAndEmpCatIdOrderByEmpFname(1, 2);
 
 						if (adminEmpList.size() > 0) {
 

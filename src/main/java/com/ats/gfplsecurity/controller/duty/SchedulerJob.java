@@ -1,6 +1,7 @@
 package com.ats.gfplsecurity.controller.duty;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -99,10 +100,15 @@ public class SchedulerJob {
 							// if(assignDutyList.get(i).getNotifyTime().equalsIgnoreCase(strTime)) {
 							//
 							// }
+							
+							List<Integer> empIdList=new ArrayList<>();
 
-							List<Integer> empIdList = Stream.of(assignDutyList.get(i).getEmpIds().split(","))
+							if(!assignDutyList.get(i).getEmpIds().isEmpty()) {
+							
+							 empIdList = Stream.of(assignDutyList.get(i).getEmpIds().split(","))
 									.map(Integer::parseInt).collect(Collectors.toList());
-
+							}
+							
 							for (int j = 0; j < empIdList.size(); j++) {
 
 								TaskDoneHeader taskDoneHeader = null;

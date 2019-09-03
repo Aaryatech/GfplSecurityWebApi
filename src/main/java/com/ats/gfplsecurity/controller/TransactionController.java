@@ -314,7 +314,7 @@ public class TransactionController {
 			Settings settings = settingsRepository.findBySettingId(1);
 
 			visitor.setExVar1(settings.getSettingKey() + "" + settings.getSettingValue());
-			visitor.setInTime(sdf.format(cal.getTimeInMillis()));
+			// visitor.setInTime(sdf.format(cal.getTimeInMillis()));
 
 			result = visitorRepository.save(visitor);
 
@@ -970,8 +970,8 @@ public class TransactionController {
 
 					MaterialGatepassDisplay disp = resultList.get(i);
 
-					List<DocumentHandover> docList = documentHandoverRepository.findByDelStatusAndGatepassInwardId(1,
-							disp.getGatepassInwardId());
+					List<DocumentHandover> docList = documentHandoverRepository
+							.findByDelStatusAndGatepassInwardId(1, disp.getGatepassInwardId());
 
 					disp.setDocHandoverDetail(docList);
 
@@ -1034,8 +1034,8 @@ public class TransactionController {
 
 					MaterialGatepassDisplay disp = resultList.get(i);
 
-					List<DocumentHandover> docList = documentHandoverRepository.findByDelStatusAndGatepassInwardId(1,
-							disp.getGatepassInwardId());
+					List<DocumentHandover> docList = documentHandoverRepository
+							.findByDelStatusAndGatepassInwardIdOrderByHandOverDateDesc(1, disp.getGatepassInwardId());
 
 					disp.setDocHandoverDetail(docList);
 
@@ -1100,8 +1100,8 @@ public class TransactionController {
 
 					MaterialGatepassDisplay disp = resultList.get(i);
 
-					List<DocumentHandover> docList = documentHandoverRepository.findByDelStatusAndGatepassInwardId(1,
-							disp.getGatepassInwardId());
+					List<DocumentHandover> docList = documentHandoverRepository
+							.findByDelStatusAndGatepassInwardIdOrderByHandOverDateDesc(1, disp.getGatepassInwardId());
 
 					disp.setDocHandoverDetail(docList);
 
@@ -1135,8 +1135,8 @@ public class TransactionController {
 				for (int i = 0; i < matGpList.size(); i++) {
 
 					MaterialGatepass disp = matGpList.get(i);
-					List<DocumentHandover> docList = documentHandoverRepository.findByDelStatusAndGatepassInwardId(1,
-							disp.getGatepassInwardId());
+					List<DocumentHandover> docList = documentHandoverRepository
+							.findByDelStatusAndGatepassInwardIdOrderByHandOverDateDesc(1, disp.getGatepassInwardId());
 
 					if (docList != null) {
 						if (docList.size() > 0) {
@@ -1208,9 +1208,9 @@ public class TransactionController {
 						SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 						String currDate = sdf.format(Calendar.getInstance().getTimeInMillis());
 
-						String fromEmpName = fromEmp.getEmpFname() + " " + fromEmp.getEmpMname()
+						String fromEmpName = fromEmp.getEmpFname() + " " + fromEmp.getEmpMname() + " "
 								+ fromEmp.getEmpSname();
-						String toEmpName = toEmp.getEmpFname() + " " + fromEmp.getEmpMname() + fromEmp.getEmpSname();
+						String toEmpName = toEmp.getEmpFname() + " " + toEmp.getEmpMname() + " " + toEmp.getEmpSname();
 
 						DocumentHandover docHandover = new DocumentHandover(0, disp.getGatepassInwardId(), currDate,
 								fromEmpId, toEmpId, fromEmpName, toEmpName, 0, 1, fromDeptId, fromDept.getEmpDeptName(),
@@ -1538,14 +1538,15 @@ public class TransactionController {
 
 			int inCompCount = 0, visTotal = 0, matTotal = 0, empVisTotal = 0;
 
-			inCompCount = visCount.getVisitor_approved() + visCount.getVisitor_pending();
+			// inCompCount = visCount.getVisitor_approved() + visCount.getVisitor_pending();
 			visTotal = visCount.getVisitor_approved() + visCount.getVisitor_pending() + visCount.getVisitor_rejected()
 					+ visCount.getVisitor_completed();
-			matTotal = visCount.getMaint_approved() + visCount.getMaint_pending() + visCount.getMaint_rejected();
+			matTotal = visCount.getMaint_approved() + visCount.getMaint_pending() + visCount.getMaint_rejected()
+					+ visCount.getMaint_completed();
 			empVisTotal = visCount.getEmp_visitor_approved() + visCount.getEmp_visitor_pending()
 					+ visCount.getEmp_visitor_rejected() + visCount.getEmp_visitor_completed();
 
-			visCount.setVisitor_in_comp(inCompCount);
+			// visCount.setVisitor_in_comp(inCompCount);
 			visCount.setVisitor_total(visTotal);
 			visCount.setEmp_visitor_total(empVisTotal);
 			visCount.setMaint_total(matTotal);
@@ -1554,8 +1555,14 @@ public class TransactionController {
 
 			// ----------------------EMP GATEPASS--------------------------------
 
+			System.err.println(
+					"------EMP GP---------------FROM DATE - " + fromDate + "        -------------TODATE - " + toDate);
+
 			EmpGatepassCount empCount = empGatepassCountRepo.getEmpGatepassCount(fromDate, toDate);
 			dashResult.setEmpGatepassCount(empCount);
+
+			System.err.println("Settings --------------------- " + settings.getSettingValue());
+			System.err.println("EMP CAT ID --------------------- " + emp);
 
 			if (settings.getSettingValue().equalsIgnoreCase(String.valueOf(emp.getEmpCatId()))) {
 
@@ -1569,7 +1576,7 @@ public class TransactionController {
 			MatGatepassCount matCount = matGatepassCountRepo.getMatGatepassCount(fromDate, toDate, emp.getEmpDeptId());
 			dashResult.setMatGatepassCount(matCount);
 
-			MatGatepassEmpWiseCount matEmpCount = matGatepassEmpWiseCountRepo.getMatGatepassCount(fromDate, toDate, 1);
+			MatGatepassEmpWiseCount matEmpCount = matGatepassEmpWiseCountRepo.getMatGatepassCount(empId);
 			dashResult.setMatGatepassEmpWiseCount(matEmpCount);
 
 		} catch (Exception e) {
@@ -1845,7 +1852,7 @@ public class TransactionController {
 								} catch (Exception e) {
 									e.printStackTrace();
 								}
-								
+
 							}
 
 						}
@@ -1949,6 +1956,18 @@ public class TransactionController {
 					 * } catch (Exception e) { e.printStackTrace(); }
 					 */
 
+				} else {
+					info.setError(true);
+					info.setMessage("failed");
+				}
+
+			} else {
+
+				int res = outwardGatepassRepository.updateStatus(status, gpOutwardId);
+
+				if (res > 0) {
+					info.setError(false);
+					info.setMessage("Success");
 				} else {
 					info.setError(true);
 					info.setMessage("failed");

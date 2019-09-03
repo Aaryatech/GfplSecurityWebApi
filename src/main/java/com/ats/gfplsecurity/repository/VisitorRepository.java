@@ -22,7 +22,7 @@ public interface VisitorRepository extends JpaRepository<Visitor, Integer>{
 
 	@Transactional
 	@Modifying
-	@Query("update Visitor set visit_status=:status WHERE gatepass_visitor_id=:gatepassVisitorId and gate_id=:gateId")
+	@Query("update Visitor set visit_status=:status, gate_id=:gateId WHERE gatepass_visitor_id=:gatepassVisitorId ")
 	int updateGatepassStatus(@Param("gatepassVisitorId") int gatepassVisitorId,@Param("status") int status,@Param("gateId") int gateId);
  
 	@Transactional

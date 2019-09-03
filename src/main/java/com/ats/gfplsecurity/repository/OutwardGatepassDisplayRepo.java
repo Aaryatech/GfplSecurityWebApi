@@ -30,7 +30,7 @@ public interface OutwardGatepassDisplayRepo extends JpaRepository<OutwardGatepas
 			+ "emp_info e WHERE e.emp_id=o.sec_id_out),'na') as sec_out_name,"
 			+ "COALESCE((SELECT CONCAT(e.emp_fname,' ',e.emp_mname,' ',e.emp_sname) FROM emp_info e "
 			+ "WHERE e.emp_id=o.sec_id_in),'na') as sec_in_name FROM t_outward_gatepass o WHERE o.del_status=1 "
-			+ "AND o.status IN(:status) AND o.emp_id IN(:empId) ", nativeQuery = true)
+			+ "AND o.status IN(:status) AND o.emp_id IN(:empId) order by o.date_out desc", nativeQuery = true)
 	List<OutwardGatepassDisplay> getOutwardGatepassListByEmp(@Param("empId") List<Integer> empId,
 			@Param("status") List<Integer> status);
 
@@ -38,7 +38,7 @@ public interface OutwardGatepassDisplayRepo extends JpaRepository<OutwardGatepas
 			+ "emp_info e WHERE e.emp_id=o.sec_id_out),'na') as sec_out_name,"
 			+ "COALESCE((SELECT CONCAT(e.emp_fname,' ',e.emp_mname,' ',e.emp_sname) FROM emp_info e "
 			+ "WHERE e.emp_id=o.sec_id_in),'na') as sec_in_name FROM t_outward_gatepass o WHERE o.del_status=1 "
-			+ "AND o.status IN(:status)", nativeQuery = true)
+			+ "AND o.status IN(:status) order by o.date_out desc", nativeQuery = true)
 	List<OutwardGatepassDisplay> getOutwardGatepassList(@Param("status") List<Integer> status);
 
 }

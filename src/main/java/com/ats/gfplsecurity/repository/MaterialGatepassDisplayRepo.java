@@ -47,7 +47,7 @@ public interface MaterialGatepassDisplayRepo extends JpaRepository<MaterialGatep
 	
 	@Query(value = " SELECT m.* from t_inward_gatepass m WHERE m.to_emp_id IN (:empIds) "
 			+ "AND m.to_dept_id IN (:deptIds) AND m.del_status=1 "
-			+ "AND m.to_status IN (:status) ", nativeQuery = true)
+			+ "AND m.to_status IN (:status) order by m.inward_date desc", nativeQuery = true)
 	List<MaterialGatepassDisplay> getMatTrackingListByDeptByEmpByStatus(
 			@Param("deptIds") List<Integer> deptIds,
 			@Param("empIds") List<Integer> empIds,
@@ -55,7 +55,7 @@ public interface MaterialGatepassDisplayRepo extends JpaRepository<MaterialGatep
 
 	@Query(value = " SELECT m.* from t_inward_gatepass m WHERE m.to_emp_id IN (:empIds) "
 			+ "AND m.del_status=1 "
-			+ "AND m.to_status IN (:status) ", nativeQuery = true)
+			+ "AND m.to_status IN (:status) order by m.inward_date desc", nativeQuery = true)
 	List<MaterialGatepassDisplay> getMatTrackingListByEmpByStatus(
 			@Param("empIds") List<Integer> empIds,
 			@Param("status") List<Integer> status);   
@@ -63,7 +63,7 @@ public interface MaterialGatepassDisplayRepo extends JpaRepository<MaterialGatep
 
 	@Query(value = " SELECT m.* from t_inward_gatepass m WHERE "
 			+ "m.to_dept_id IN (:deptIds) AND m.del_status=1 "
-			+ "AND m.to_status IN (:status) ", nativeQuery = true)
+			+ "AND m.to_status IN (:status) order by m.inward_date desc", nativeQuery = true)
 	List<MaterialGatepassDisplay> getMatTrackingListByDeptByStatus(
 			@Param("deptIds") List<Integer> deptIds,
 			@Param("status") List<Integer> status);   
@@ -71,7 +71,7 @@ public interface MaterialGatepassDisplayRepo extends JpaRepository<MaterialGatep
 	
 	@Query(value = " SELECT m.* from t_inward_gatepass m WHERE "
 			+ "m.del_status=1 "
-			+ "AND m.to_status IN (:status) ", nativeQuery = true)
+			+ "AND m.to_status IN (:status) order by m.inward_date desc", nativeQuery = true)
 	List<MaterialGatepassDisplay> getMatTrackingListByStatus(
 			@Param("status") List<Integer> status);   
 

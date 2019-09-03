@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ats.gfplsecurity.common.Firebase;
 import com.ats.gfplsecurity.common.Info;
 import com.ats.gfplsecurity.model.duty.AssignDuty;
 import com.ats.gfplsecurity.model.duty.AssignDutyDisplay;
@@ -1115,5 +1117,15 @@ public class DutyMasterController {
 
 		return result;
 	}
+	
+	
+	
+	/*public static void main(String[] args) throws Exception {
+		
+		Firebase.sendPushNotifForCommunication("fjYvTMg4WRo:APA91bEgYHR1C9DvcBpAqD0QA_uc22o2WnQp8qa1Zdz3J3MxU3nbebsglTOQO3jMoiDuS7WjLTyucIQKnxZ1qg4tOPtxxJFpX2X2hkgusLnG4bW3it9WWuVL2vpp7u5LoBtNLLYIYwj1", "TEST", "AAAAAA", "1");
+		
+		
+	}*/
+
 
 }

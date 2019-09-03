@@ -13,6 +13,7 @@ public interface DocumentHandoverRepository extends JpaRepository<DocumentHandov
 	List<DocumentHandover> findAllByDelStatus(int i);
 	
 	List<DocumentHandover> findByDelStatusAndGatepassInwardId(int del,int gpId);
+	List<DocumentHandover> findByDelStatusAndGatepassInwardIdOrderByHandOverDateDesc(int del,int gpId);
 
 	DocumentHandover findByDocumentHandoverId(int documentHandoverId);
 

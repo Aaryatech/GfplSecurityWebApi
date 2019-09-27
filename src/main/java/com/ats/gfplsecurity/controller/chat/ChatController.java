@@ -2,6 +2,7 @@ package com.ats.gfplsecurity.controller.chat;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,12 +16,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ats.gfplsecurity.common.Firebase;
 import com.ats.gfplsecurity.common.Info;
 import com.ats.gfplsecurity.model.chat.ChatDetail;
+import com.ats.gfplsecurity.model.chat.ChatDisplay;
 import com.ats.gfplsecurity.model.chat.ChatEmpToken;
 import com.ats.gfplsecurity.model.chat.ChatGroup;
 import com.ats.gfplsecurity.model.chat.ChatGroupDisplay;
 import com.ats.gfplsecurity.model.chat.ChatHeader;
 import com.ats.gfplsecurity.model.chat.ChatHeaderDisplay;
 import com.ats.gfplsecurity.repository.chat.ChatDetailRepo;
+import com.ats.gfplsecurity.repository.chat.ChatDisplayRepo;
 import com.ats.gfplsecurity.repository.chat.ChatEmpTokenRepo;
 import com.ats.gfplsecurity.repository.chat.ChatGroupDisplayRepo;
 import com.ats.gfplsecurity.repository.chat.ChatGroupRepo;
@@ -28,6 +31,7 @@ import com.ats.gfplsecurity.repository.chat.ChatHeaderDisplayRepo;
 import com.ats.gfplsecurity.repository.chat.ChatHeaderRepo;
 import com.ats.gfplsecurity.repository.chat.ChatMemoDisplayRepo;
 import com.ats.gfplsecurity.repository.chat.ChatMemoRepo;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ats.gfplsecurity.model.chat.ChatMemo;
 import com.ats.gfplsecurity.model.chat.ChatMemoDisplay;
 
@@ -58,6 +62,10 @@ public class ChatController {
 
 	@Autowired
 	ChatEmpTokenRepo chatEmpTokenRepo;
+	
+	@Autowired
+	ChatDisplayRepo chatDisplayRepo;
+	
 
 	// -----------------------CHAT GROUP CRUD------------------------------------
 
@@ -285,11 +293,23 @@ public class ChatController {
 	public ChatDetail saveChatDetail(@RequestBody ChatDetail chatDetail) {
 		ChatDetail detail = null;
 
+		Calendar cal=Calendar.getInstance();
+		chatDetail.setServerDate(""+cal.getTimeInMillis());
+		
 		detail = chatDetailRepo.save(chatDetail);
 
 		if (detail == null) {
 			detail = new ChatDetail();
 		} else {
+			
+             String json = "";
+             
+             ObjectMapper Obj = new ObjectMapper();
+             try { 
+                 json = Obj.writeValueAsString(detail); 
+             }catch(Exception e) {
+            	 e.printStackTrace();
+             } 
 			
 			List<ChatEmpToken> empTokenList = chatEmpTokenRepo.getEmpTokenByHeader(detail.getHeaderId());
 
@@ -304,7 +324,7 @@ public class ChatController {
 							
 
 							try {
-								Firebase.sendPushNotifForCommunication(empTokenList.get(i).getToken(),empTokenList.get(i).getHeaderName(),detail.toString(),"chat-"+detail.getHeaderId());
+								Firebase.sendPushNotifForCommunication(empTokenList.get(i).getToken(),empTokenList.get(i).getHeaderName(),json,"chat-"+detail.getHeaderId());
 							} catch (IOException e) {
 								e.printStackTrace();
 							}
@@ -321,7 +341,7 @@ public class ChatController {
 		return detail;
 	}
 
-	@GetMapping("/getAllChatDetail")
+	@PostMapping("/getAllChatDetailByHeader")
 	public List<ChatDetail> getAllChatDetail(@RequestParam(value = "headerId") int headerId) {
 		List<ChatDetail> detailList = new ArrayList<>();
 
@@ -329,6 +349,19 @@ public class ChatController {
 
 		return detailList;
 	}
+	
+	
+	@GetMapping("/getAllChatByHeaderAndLastSync")
+	public List<ChatDisplay> getAllChatByHeaderAndLastSync(@RequestParam(value = "headerId") int headerId,@RequestParam(value = "lastSyncId") int lastSyncId,@RequestParam(value = "userId") int userId) {
+		List<ChatDisplay> detailList = new ArrayList<>();
+
+		detailList = chatDisplayRepo.getChatByHeaderAndLastSyncId(headerId, lastSyncId, userId);
+
+		return detailList;
+	}
+	
+	
+	
 
 	@PostMapping("/getChatDetailById")
 	public ChatDetail getChatDetailById(@RequestParam(value = "detailId") int detailId) {

@@ -18,8 +18,12 @@ public interface VisitCardRepository extends JpaRepository<VisitCard, Integer> {
 
 	VisitCard findByCardId(int companyId);
 	
-	@Query(value="SELECT v.* FROM m_visit_card v WHERE v.del_status=1 AND v.card_id NOT IN "
+	/*@Query(value="SELECT v.* FROM m_visit_card v WHERE v.del_status=1 AND v.card_id NOT IN "
 			+ "(SELECT g.visit_card_id from t_gatepass_visitor g WHERE g.del_status =1 AND g.visit_status IN(3,4))",nativeQuery=true)
+	List<VisitCard> getAvailCard();*/
+	
+	
+	@Query(value="SELECT v.* FROM m_visit_card v WHERE v.del_status = 1 AND NOT FIND_IN_SET( v.card_id, ( SELECT GROUP_CONCAT(g.ex_var3) FROM t_gatepass_visitor g WHERE g.del_status = 1 AND g.visit_status IN(3, 4) ))",nativeQuery=true)
 	List<VisitCard> getAvailCard();
 	
 

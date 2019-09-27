@@ -13,7 +13,51 @@ import com.ats.gfplsecurity.model.VisitorGatepassDisplay;
 public interface VisitorGatepassDisplayRepository extends JpaRepository<VisitorGatepassDisplay, Integer>{
 	
 	@Query(value = " SELECT\r\n" + 
-			"    v.*,\r\n" + 
+			"    v.`gatepass_visitor_id`,\r\n" + 
+			"    v.`visit_date_in`,\r\n" + 
+			"    v.`security_id_in`,\r\n" + 
+			"    v.`person_name`,\r\n" + 
+			"    v.`person_company`,\r\n" + 
+			"    v.`person_photo`,\r\n" + 
+			"    v.`mobile_no`,\r\n" + 
+			"    v.`id_proof`,\r\n" + 
+			"    v.`id_proof1`,\r\n" + 
+			"    v.`other_photo`,\r\n" + 
+			"    v.`purpose_id`,\r\n" + 
+			"    v.`visit_purpose_text`,\r\n" + 
+			"    v.`purpose_remark`,\r\n" + 
+			"    v.`emp_ids`,\r\n" + 
+			"    v.`emp_name`,\r\n" + 
+			"    v.`gate_id`,\r\n" + 
+			"    v.`gate_passtype`,\r\n" + 
+			"    v.`visit_status`,\r\n" + 
+			"    v.`visit_type`,\r\n" + 
+			"    v.`in_time`,\r\n" + 
+			"    v.`visit_card_id`,\r\n" + 
+			"    (\r\n" + 
+			"    SELECT\r\n" + 
+			"        GROUP_CONCAT(vc.card_number)\r\n" + 
+			"    FROM\r\n" + 
+			"        m_visit_card vc\r\n" + 
+			"    WHERE\r\n" + 
+			"        FIND_IN_SET(vc.card_id, v.ex_var3)\r\n" + 
+			") AS visit_card_no,\r\n" + 
+			"v.`take_mobile`,\r\n" + 
+			"v.`meeting_discussion`,\r\n" + 
+			"v.`upload_photo`,\r\n" + 
+			"v.`visit_out_time`,\r\n" + 
+			"v.`total_time_difference`,\r\n" + 
+			"v.`security_id_out`,\r\n" + 
+			"v.`visit_date_out`,\r\n" + 
+			"v.`user_sign_image`,\r\n" + 
+			"v.`del_status`,\r\n" + 
+			"v.`is_used`,\r\n" + 
+			"v.`ex_int1`,\r\n" + 
+			"v.`ex_int2`,\r\n" + 
+			"v.`ex_int3`,\r\n" + 
+			"v.`ex_var1`,\r\n" + 
+			"v.`ex_var2`,\r\n" + 
+			"v.`ex_var3`," + 
 			"    COALESCE(\r\n" + 
 			"        (\r\n" + 
 			"        SELECT\r\n" + 
@@ -104,7 +148,51 @@ public interface VisitorGatepassDisplayRepository extends JpaRepository<VisitorG
 
 
 	@Query(value = " SELECT\r\n" + 
-			"    v.*,\r\n" + 
+			"    v.`gatepass_visitor_id`,\r\n" + 
+			"    v.`visit_date_in`,\r\n" + 
+			"    v.`security_id_in`,\r\n" + 
+			"    v.`person_name`,\r\n" + 
+			"    v.`person_company`,\r\n" + 
+			"    v.`person_photo`,\r\n" + 
+			"    v.`mobile_no`,\r\n" + 
+			"    v.`id_proof`,\r\n" + 
+			"    v.`id_proof1`,\r\n" + 
+			"    v.`other_photo`,\r\n" + 
+			"    v.`purpose_id`,\r\n" + 
+			"    v.`visit_purpose_text`,\r\n" + 
+			"    v.`purpose_remark`,\r\n" + 
+			"    v.`emp_ids`,\r\n" + 
+			"    v.`emp_name`,\r\n" + 
+			"    v.`gate_id`,\r\n" + 
+			"    v.`gate_passtype`,\r\n" + 
+			"    v.`visit_status`,\r\n" + 
+			"    v.`visit_type`,\r\n" + 
+			"    v.`in_time`,\r\n" + 
+			"    v.`visit_card_id`,\r\n" + 
+			"    (\r\n" + 
+			"    SELECT\r\n" + 
+			"        GROUP_CONCAT(vc.card_number)\r\n" + 
+			"    FROM\r\n" + 
+			"        m_visit_card vc\r\n" + 
+			"    WHERE\r\n" + 
+			"        FIND_IN_SET(vc.card_id, v.ex_var3)\r\n" + 
+			") AS visit_card_no,\r\n" + 
+			"v.`take_mobile`,\r\n" + 
+			"v.`meeting_discussion`,\r\n" + 
+			"v.`upload_photo`,\r\n" + 
+			"v.`visit_out_time`,\r\n" + 
+			"v.`total_time_difference`,\r\n" + 
+			"v.`security_id_out`,\r\n" + 
+			"v.`visit_date_out`,\r\n" + 
+			"v.`user_sign_image`,\r\n" + 
+			"v.`del_status`,\r\n" + 
+			"v.`is_used`,\r\n" + 
+			"v.`ex_int1`,\r\n" + 
+			"v.`ex_int2`,\r\n" + 
+			"v.`ex_int3`,\r\n" + 
+			"v.`ex_var1`,\r\n" + 
+			"v.`ex_var2`,\r\n" + 
+			"v.`ex_var3`," + 
 			"    COALESCE(\r\n" + 
 			"        (\r\n" + 
 			"        SELECT\r\n" + 
@@ -185,8 +273,52 @@ public interface VisitorGatepassDisplayRepository extends JpaRepository<VisitorG
 	
 	
 	
-	@Query(value = " SELECT\r\n" + 
-			"    v.*,\r\n" + 
+	@Query(value = "SELECT\r\n" + 
+			"    v.`gatepass_visitor_id`,\r\n" + 
+			"    v.`visit_date_in`,\r\n" + 
+			"    v.`security_id_in`,\r\n" + 
+			"    v.`person_name`,\r\n" + 
+			"    v.`person_company`,\r\n" + 
+			"    v.`person_photo`,\r\n" + 
+			"    v.`mobile_no`,\r\n" + 
+			"    v.`id_proof`,\r\n" + 
+			"    v.`id_proof1`,\r\n" + 
+			"    v.`other_photo`,\r\n" + 
+			"    v.`purpose_id`,\r\n" + 
+			"    v.`visit_purpose_text`,\r\n" + 
+			"    v.`purpose_remark`,\r\n" + 
+			"    v.`emp_ids`,\r\n" + 
+			"    v.`emp_name`,\r\n" + 
+			"    v.`gate_id`,\r\n" + 
+			"    v.`gate_passtype`,\r\n" + 
+			"    v.`visit_status`,\r\n" + 
+			"    v.`visit_type`,\r\n" + 
+			"    v.`in_time`,\r\n" + 
+			"    v.`visit_card_id`,\r\n" + 
+			"    (\r\n" + 
+			"    SELECT\r\n" + 
+			"        GROUP_CONCAT(vc.card_number)\r\n" + 
+			"    FROM\r\n" + 
+			"        m_visit_card vc\r\n" + 
+			"    WHERE\r\n" + 
+			"        FIND_IN_SET(vc.card_id, v.ex_var3)\r\n" + 
+			") AS visit_card_no,\r\n" + 
+			"v.`take_mobile`,\r\n" + 
+			"v.`meeting_discussion`,\r\n" + 
+			"v.`upload_photo`,\r\n" + 
+			"v.`visit_out_time`,\r\n" + 
+			"v.`total_time_difference`,\r\n" + 
+			"v.`security_id_out`,\r\n" + 
+			"v.`visit_date_out`,\r\n" + 
+			"v.`user_sign_image`,\r\n" + 
+			"v.`del_status`,\r\n" + 
+			"v.`is_used`,\r\n" + 
+			"v.`ex_int1`,\r\n" + 
+			"v.`ex_int2`,\r\n" + 
+			"v.`ex_int3`,\r\n" + 
+			"v.`ex_var1`,\r\n" + 
+			"v.`ex_var2`,\r\n" + 
+			"v.`ex_var3`," + 
 			"    COALESCE(\r\n" + 
 			"        (\r\n" + 
 			"        SELECT\r\n" + 
@@ -269,7 +401,51 @@ public interface VisitorGatepassDisplayRepository extends JpaRepository<VisitorG
 	
 	
 	@Query(value = " SELECT\r\n" + 
-			"    v.*,\r\n" + 
+			"    v.`gatepass_visitor_id`,\r\n" + 
+			"    v.`visit_date_in`,\r\n" + 
+			"    v.`security_id_in`,\r\n" + 
+			"    v.`person_name`,\r\n" + 
+			"    v.`person_company`,\r\n" + 
+			"    v.`person_photo`,\r\n" + 
+			"    v.`mobile_no`,\r\n" + 
+			"    v.`id_proof`,\r\n" + 
+			"    v.`id_proof1`,\r\n" + 
+			"    v.`other_photo`,\r\n" + 
+			"    v.`purpose_id`,\r\n" + 
+			"    v.`visit_purpose_text`,\r\n" + 
+			"    v.`purpose_remark`,\r\n" + 
+			"    v.`emp_ids`,\r\n" + 
+			"    v.`emp_name`,\r\n" + 
+			"    v.`gate_id`,\r\n" + 
+			"    v.`gate_passtype`,\r\n" + 
+			"    v.`visit_status`,\r\n" + 
+			"    v.`visit_type`,\r\n" + 
+			"    v.`in_time`,\r\n" + 
+			"    v.`visit_card_id`,\r\n" + 
+			"    (\r\n" + 
+			"    SELECT\r\n" + 
+			"        GROUP_CONCAT(vc.card_number)\r\n" + 
+			"    FROM\r\n" + 
+			"        m_visit_card vc\r\n" + 
+			"    WHERE\r\n" + 
+			"        FIND_IN_SET(vc.card_id, v.ex_var3)\r\n" + 
+			") AS visit_card_no,\r\n" + 
+			"v.`take_mobile`,\r\n" + 
+			"v.`meeting_discussion`,\r\n" + 
+			"v.`upload_photo`,\r\n" + 
+			"v.`visit_out_time`,\r\n" + 
+			"v.`total_time_difference`,\r\n" + 
+			"v.`security_id_out`,\r\n" + 
+			"v.`visit_date_out`,\r\n" + 
+			"v.`user_sign_image`,\r\n" + 
+			"v.`del_status`,\r\n" + 
+			"v.`is_used`,\r\n" + 
+			"v.`ex_int1`,\r\n" + 
+			"v.`ex_int2`,\r\n" + 
+			"v.`ex_int3`,\r\n" + 
+			"v.`ex_var1`,\r\n" + 
+			"v.`ex_var2`,\r\n" + 
+			"v.`ex_var3`," + 
 			"    COALESCE(\r\n" + 
 			"        (\r\n" + 
 			"        SELECT\r\n" + 
@@ -350,7 +526,51 @@ public interface VisitorGatepassDisplayRepository extends JpaRepository<VisitorG
 	
 	
 	@Query(value = " SELECT\r\n" + 
-			"    v.*,\r\n" + 
+			"    v.`gatepass_visitor_id`,\r\n" + 
+			"    v.`visit_date_in`,\r\n" + 
+			"    v.`security_id_in`,\r\n" + 
+			"    v.`person_name`,\r\n" + 
+			"    v.`person_company`,\r\n" + 
+			"    v.`person_photo`,\r\n" + 
+			"    v.`mobile_no`,\r\n" + 
+			"    v.`id_proof`,\r\n" + 
+			"    v.`id_proof1`,\r\n" + 
+			"    v.`other_photo`,\r\n" + 
+			"    v.`purpose_id`,\r\n" + 
+			"    v.`visit_purpose_text`,\r\n" + 
+			"    v.`purpose_remark`,\r\n" + 
+			"    v.`emp_ids`,\r\n" + 
+			"    v.`emp_name`,\r\n" + 
+			"    v.`gate_id`,\r\n" + 
+			"    v.`gate_passtype`,\r\n" + 
+			"    v.`visit_status`,\r\n" + 
+			"    v.`visit_type`,\r\n" + 
+			"    v.`in_time`,\r\n" + 
+			"    v.`visit_card_id`,\r\n" + 
+			"    (\r\n" + 
+			"    SELECT\r\n" + 
+			"        GROUP_CONCAT(vc.card_number)\r\n" + 
+			"    FROM\r\n" + 
+			"        m_visit_card vc\r\n" + 
+			"    WHERE\r\n" + 
+			"        FIND_IN_SET(vc.card_id, v.ex_var3)\r\n" + 
+			") AS visit_card_no,\r\n" + 
+			"v.`take_mobile`,\r\n" + 
+			"v.`meeting_discussion`,\r\n" + 
+			"v.`upload_photo`,\r\n" + 
+			"v.`visit_out_time`,\r\n" + 
+			"v.`total_time_difference`,\r\n" + 
+			"v.`security_id_out`,\r\n" + 
+			"v.`visit_date_out`,\r\n" + 
+			"v.`user_sign_image`,\r\n" + 
+			"v.`del_status`,\r\n" + 
+			"v.`is_used`,\r\n" + 
+			"v.`ex_int1`,\r\n" + 
+			"v.`ex_int2`,\r\n" + 
+			"v.`ex_int3`,\r\n" + 
+			"v.`ex_var1`,\r\n" + 
+			"v.`ex_var2`,\r\n" + 
+			"v.`ex_var3`," + 
 			"    COALESCE(\r\n" + 
 			"        (\r\n" + 
 			"        SELECT\r\n" + 

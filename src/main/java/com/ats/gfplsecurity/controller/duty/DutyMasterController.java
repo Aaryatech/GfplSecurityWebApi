@@ -826,7 +826,9 @@ public class DutyMasterController {
 			@RequestParam(value = "empId") List<Integer> empId, @RequestParam(value = "date") String date) {
 		List<EmpWiseCount> result = null;
 
-		if (empId.contains(-1)) {
+		if (empId.contains(-1) && deptId == -1) {
+			result = empWiseCountRepo.getAllCount(date);
+		} else if (empId.contains(-1)) {
 			result = empWiseCountRepo.getAllEmpWiseCount(deptId, date);
 		} else {
 			result = empWiseCountRepo.getEmpWiseCount(deptId, empId, date);
@@ -856,22 +858,23 @@ public class DutyMasterController {
 
 	// get duty Report
 	@PostMapping("/getDutyReportByEmp")
-	public List<DutyReportData> getDutyReportByEmp(@RequestParam(value = "empId") int empId,@RequestParam(value = "langId") int langId) {
+	public List<DutyReportData> getDutyReportByEmp(@RequestParam(value = "empId") int empId,
+			@RequestParam(value = "langId") int langId) {
 		List<DutyReportData> result = new ArrayList<>();
 
-		List<DutyReport> reportData=new ArrayList<>();
-		
-		if(langId==1) {
+		List<DutyReport> reportData = new ArrayList<>();
+
+		if (langId == 1) {
 			reportData = dutyReportRepo.getDutyReportByEmpIdEng(empId);
-		}else if(langId==2) {
+		} else if (langId == 2) {
 			reportData = dutyReportRepo.getDutyReportByEmpIdMar(empId);
-		}else if(langId==3) {
+		} else if (langId == 3) {
 			reportData = dutyReportRepo.getDutyReportByEmpIdHin(empId);
-		}else {
+		} else {
 			reportData = dutyReportRepo.getDutyReportByEmpIdEng(empId);
-		} 
-		
-		//List<DutyReport> reportData = dutyReportRepo.getDutyReportByEmpId(empId);
+		}
+
+		// List<DutyReport> reportData = dutyReportRepo.getDutyReportByEmpId(empId);
 		System.err.println("REPORT ------------------ " + reportData);
 
 		if (reportData != null) {
@@ -879,11 +882,11 @@ public class DutyMasterController {
 			DutyReportData dailyData = new DutyReportData();
 			dailyData.setType(1);
 			dailyData.setDutyType("Daily Basis");
-			
+
 			DutyReportData dayData = new DutyReportData();
 			dayData.setType(2);
 			dayData.setDutyType("Day Basis");
-			
+
 			DutyReportData dateData = new DutyReportData();
 			dateData.setType(3);
 			dateData.setDutyType("Date Basis");
@@ -978,12 +981,12 @@ public class DutyMasterController {
 				}
 
 			}
-			
+
 			dailyData.setDutyList(dailyDutyList);
 			result.add(dailyData);
-			
-			//-------------DAY BASIS-----------------------
-			
+
+			// -------------DAY BASIS-----------------------
+
 			for (int j = 0; j < dayDutyId.size(); j++) {
 
 				for (int i = 0; i < reportData.size(); i++) {
@@ -1006,8 +1009,7 @@ public class DutyMasterController {
 
 						for (int k = 0; k < reportData.size(); k++) {
 
-							if (reportData.get(k).getType() == 2
-									&& reportData.get(k).getDutyId() == dayDutyId.get(j)) {
+							if (reportData.get(k).getType() == 2 && reportData.get(k).getDutyId() == dayDutyId.get(j)) {
 
 								if (!taskIds.contains(reportData.get(k).getTaskId())) {
 
@@ -1042,12 +1044,12 @@ public class DutyMasterController {
 				}
 
 			}
-			
+
 			dayData.setDutyList(dayDutyList);
 			result.add(dayData);
-			
-			//--------------DATE BASIS---------------------------------
-			
+
+			// --------------DATE BASIS---------------------------------
+
 			for (int j = 0; j < dateDutyId.size(); j++) {
 
 				for (int i = 0; i < reportData.size(); i++) {
@@ -1106,26 +1108,24 @@ public class DutyMasterController {
 				}
 
 			}
-			
+
 			dateData.setDutyList(dateDutyList);
 			result.add(dateData);
-			
 
 		}
 
-		
-
 		return result;
 	}
-	
-	
-	
-	/*public static void main(String[] args) throws Exception {
-		
-		Firebase.sendPushNotifForCommunication("fjYvTMg4WRo:APA91bEgYHR1C9DvcBpAqD0QA_uc22o2WnQp8qa1Zdz3J3MxU3nbebsglTOQO3jMoiDuS7WjLTyucIQKnxZ1qg4tOPtxxJFpX2X2hkgusLnG4bW3it9WWuVL2vpp7u5LoBtNLLYIYwj1", "TEST", "AAAAAA", "1");
-		
-		
-	}*/
 
+	/*
+	 * public static void main(String[] args) throws Exception {
+	 * 
+	 * Firebase.sendPushNotifForCommunication(
+	 * "fjYvTMg4WRo:APA91bEgYHR1C9DvcBpAqD0QA_uc22o2WnQp8qa1Zdz3J3MxU3nbebsglTOQO3jMoiDuS7WjLTyucIQKnxZ1qg4tOPtxxJFpX2X2hkgusLnG4bW3it9WWuVL2vpp7u5LoBtNLLYIYwj1",
+	 * "TEST", "AAAAAA", "1");
+	 * 
+	 * 
+	 * }
+	 */
 
 }

@@ -150,6 +150,9 @@ public class TransactionController {
 				status.add(1);
 				status.add(2);
 				status.add(3);
+				status.add(4);
+				status.add(5);
+				status.add(6);
 
 			}
 
@@ -218,6 +221,9 @@ public class TransactionController {
 				status.add(1);
 				status.add(2);
 				status.add(3);
+				status.add(4);
+				status.add(5);
+				status.add(6);
 
 			}
 
@@ -673,6 +679,9 @@ public class TransactionController {
 				status.add(1);
 				status.add(2);
 				status.add(3);
+				status.add(4);
+				status.add(5);
+				status.add(6);
 			}
 
 			if (deptIds.contains(-1) && empIds.equalsIgnoreCase("-1")) {
@@ -719,6 +728,9 @@ public class TransactionController {
 				status.add(1);
 				status.add(2);
 				status.add(3);
+				status.add(4);
+				status.add(5);
+				status.add(6);
 			}
 
 			if (typeIds.contains(-1) && deptIds.contains(-1) && empIds.equalsIgnoreCase("-1")) {
@@ -781,6 +793,9 @@ public class TransactionController {
 				status.add(1);
 				status.add(2);
 				status.add(3);
+				status.add(4);
+				status.add(5);
+				status.add(6);
 			}
 
 			if (supIds.contains(-1)) {
@@ -817,6 +832,9 @@ public class TransactionController {
 				status.add(1);
 				status.add(2);
 				status.add(3);
+				status.add(4);
+				status.add(5);
+				status.add(6);
 			}
 
 			if (supIds.contains(-1)) {
@@ -837,24 +855,121 @@ public class TransactionController {
 	}
 
 	// --Save Material Gatepass Header and Detail--
+	/*
+	 * @PostMapping("/saveMaterialGatepass") public MaterialGatepass
+	 * saveMaterialGatepass(@RequestBody MaterialGatepass materialGatepass) {
+	 * 
+	 * MaterialGatepass result = null;
+	 * 
+	 * try {
+	 * 
+	 * Settings settings = settingsRepository.findBySettingId(1);
+	 * 
+	 * materialGatepass.setExVar1(settings.getSettingKey() + "" +
+	 * settings.getSettingValue());
+	 * 
+	 * result = materialGatepassRepository.save(materialGatepass);
+	 * 
+	 * if (result != null) {
+	 * 
+	 * int val = Integer.parseInt(settings.getSettingValue()); int value = val + 1;
+	 * int updateRes = settingsRepository.updateValue(1, "" + value);
+	 * 
+	 * String toDeptName =
+	 * employeeRepository.getDeptNameByEmpId(result.getSecurityId()); Employee emp =
+	 * employeeRepository.findByEmpIdAndDelStatus(result.getSecurityId(), 1);
+	 * 
+	 * EmployeeDepartment dept =
+	 * employeeDepartmentRepository.findByEmpDeptIdAndDelStatus(1, 1);
+	 * 
+	 * String supplierDeptName = "";
+	 * 
+	 * if (dept != null) { supplierDeptName = dept.getEmpDeptName(); }
+	 * 
+	 * SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); String currDate =
+	 * sdf.format(Calendar.getInstance().getTimeInMillis());
+	 * 
+	 * DocumentHandover docHandover = new DocumentHandover(0,
+	 * result.getGatepassInwardId(), currDate, result.getPartyId(),
+	 * result.getSecurityId(), result.getPartyName(), result.getSecurityName(), 1,
+	 * 1, 1, supplierDeptName, emp.getEmpDeptId(), toDeptName, 0, 0, 0, "na", "na",
+	 * "na");
+	 * 
+	 * DocumentHandover doc = documentHandoverRepository.save(docHandover);
+	 * 
+	 * try {
+	 * 
+	 * if (materialGatepass.getGatepassInwardId() == 0) {
+	 * 
+	 * List<Employee> adminEmpList = new ArrayList(); adminEmpList =
+	 * employeeRepository.findAllByDelStatusAndEmpCatIdOrderByEmpFname(1, 2);
+	 * 
+	 * if (adminEmpList.size() > 0) {
+	 * 
+	 * for (int i = 0; i < adminEmpList.size(); i++) {
+	 * 
+	 * Employee emp1 = employeeRepository
+	 * .findByEmpIdAndDelStatus(adminEmpList.get(i).getEmpId(), 1);
+	 * 
+	 * Firebase.sendPushNotifForCommunication(adminEmpList.get(i).getExVar1(),
+	 * "Inward Gatepass Notification", "" + materialGatepass.getPartyName() +
+	 * " has delivered material to " + materialGatepass.getToEmpName() + " on " +
+	 * materialGatepass.getInwardDate(), "8");
+	 * 
+	 * }
+	 * 
+	 * } }
+	 * 
+	 * } catch (Exception e) { e.printStackTrace(); }
+	 * 
+	 * try { Employee emp2 =
+	 * employeeRepository.findByEmpIdAndDelStatus(materialGatepass.getToEmpId(), 1);
+	 * 
+	 * Firebase.sendPushNotifForCommunication(emp2.getExVar1(),
+	 * "Inward Gatepass Notification", "" + materialGatepass.getPartyName() +
+	 * " has delivered the material on " + materialGatepass.getInwardDate(), "8");
+	 * 
+	 * } catch (Exception e) { e.printStackTrace(); }
+	 * 
+	 * }
+	 * 
+	 * } catch (Exception e) { e.printStackTrace(); }
+	 * 
+	 * return result; }
+	 */
+
 	@PostMapping("/saveMaterialGatepass")
 	public MaterialGatepass saveMaterialGatepass(@RequestBody MaterialGatepass materialGatepass) {
 
 		MaterialGatepass result = null;
+		int id = materialGatepass.getGatepassInwardId();
 
 		try {
 
-			Settings settings = settingsRepository.findBySettingId(1);
+			if (id == 0) {
 
-			materialGatepass.setExVar1(settings.getSettingKey() + "" + settings.getSettingValue());
+				List<MaterialGatepass> matGpList = materialGatepassRepository.findAllByDelStatusAndInwardDate(1,
+						materialGatepass.getInwardDate());
 
-			result = materialGatepassRepository.save(materialGatepass);
+				int count = 0;
+				if (matGpList != null) {
+					System.err.println("COUNT --------------------------------- " + matGpList.size());
+					count = matGpList.size() + 1;
+				}
+
+				SimpleDateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
+				SimpleDateFormat df2 = new SimpleDateFormat("ddMMyyyy");
+
+				Date d = df1.parse(materialGatepass.getInwardDate());
+
+				materialGatepass.setExVar1("GP" + df2.format(d.getTime()) + "-" + count);
+
+				result = materialGatepassRepository.save(materialGatepass);
+			} else {
+				result = materialGatepassRepository.save(materialGatepass);
+			}
 
 			if (result != null) {
-
-				int val = Integer.parseInt(settings.getSettingValue());
-				int value = val + 1;
-				int updateRes = settingsRepository.updateValue(1, "" + value);
 
 				String toDeptName = employeeRepository.getDeptNameByEmpId(result.getSecurityId());
 				Employee emp = employeeRepository.findByEmpIdAndDelStatus(result.getSecurityId(), 1);
@@ -890,12 +1005,15 @@ public class TransactionController {
 								Employee emp1 = employeeRepository
 										.findByEmpIdAndDelStatus(adminEmpList.get(i).getEmpId(), 1);
 
-								Firebase.sendPushNotifForCommunication(adminEmpList.get(i).getExVar1(),
-										"Inward Gatepass Notification",
-										"" + materialGatepass.getPartyName() + " has delivered material to "
-												+ materialGatepass.getToEmpName() + " on "
-												+ materialGatepass.getInwardDate(),
-										"8");
+								if (adminEmpList.get(i).getExVar1() != null) {
+
+									Firebase.sendPushNotifForCommunication(adminEmpList.get(i).getExVar1(),
+											"Inward Gatepass Notification",
+											"" + materialGatepass.getPartyName() + " has delivered material to "
+													+ materialGatepass.getToEmpName() + " on "
+													+ materialGatepass.getInwardDate(),
+											"8");
+								}
 
 							}
 
@@ -909,10 +1027,13 @@ public class TransactionController {
 				try {
 					Employee emp2 = employeeRepository.findByEmpIdAndDelStatus(materialGatepass.getToEmpId(), 1);
 
-					Firebase.sendPushNotifForCommunication(emp2.getExVar1(), "Inward Gatepass Notification",
-							"" + materialGatepass.getPartyName() + " has delivered the material on "
-									+ materialGatepass.getInwardDate(),
-							"8");
+					if (emp2.getExVar1() != null) {
+
+						Firebase.sendPushNotifForCommunication(emp2.getExVar1(), "Inward Gatepass Notification",
+								"" + materialGatepass.getPartyName() + " has delivered the material on "
+										+ materialGatepass.getInwardDate(),
+								"8");
+					}
 
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -944,6 +1065,9 @@ public class TransactionController {
 				status.add(1);
 				status.add(2);
 				status.add(3);
+				status.add(4);
+				status.add(5);
+				status.add(6);
 			}
 
 			if (deptIds.contains(-1) && empIds.contains(-1)) {
@@ -970,8 +1094,8 @@ public class TransactionController {
 
 					MaterialGatepassDisplay disp = resultList.get(i);
 
-					List<DocumentHandover> docList = documentHandoverRepository
-							.findByDelStatusAndGatepassInwardId(1, disp.getGatepassInwardId());
+					List<DocumentHandover> docList = documentHandoverRepository.findByDelStatusAndGatepassInwardId(1,
+							disp.getGatepassInwardId());
 
 					disp.setDocHandoverDetail(docList);
 
@@ -1005,6 +1129,9 @@ public class TransactionController {
 				status.add(1);
 				status.add(2);
 				status.add(3);
+				status.add(4);
+				status.add(5);
+				status.add(6);
 			}
 
 			if (deptIds.contains(-1) && empIds.contains(-1)) {
@@ -1071,6 +1198,9 @@ public class TransactionController {
 				status.add(1);
 				status.add(2);
 				status.add(3);
+				status.add(4);
+				status.add(5);
+				status.add(6);
 			}
 
 			if (deptIds.contains(-1) && supIds.contains(-1)) {

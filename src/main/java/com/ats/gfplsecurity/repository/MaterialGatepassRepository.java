@@ -20,5 +20,7 @@ public interface MaterialGatepassRepository extends JpaRepository<MaterialGatepa
 	@Query(value = " SELECT * FROM t_inward_gatepass WHERE del_status=1 AND gatepass_inward_id IN(:ids) ", nativeQuery = true)
 	List<MaterialGatepass> getMatGPList(
 			@Param("ids") List<Integer> ids);   
+	
+	List<MaterialGatepass> findAllByDelStatusAndInwardDate(int i,String date);
 
 }

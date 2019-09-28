@@ -17,7 +17,7 @@ public interface VisitorMasterRepository extends JpaRepository<VisitorMaster, In
 
 	@Transactional
 	@Modifying
-	@Query(value = "UPDATE VisitorMaster SET delStatus=0 WHERE visitorId=:visitorId", nativeQuery = true)
+	@Query(value = "UPDATE m_visitor SET del_status=0 WHERE visitor_id=:visitorId", nativeQuery = true)
 	int deleteVistor(@Param("visitorId") int visitorId);
 
 	VisitorMaster findByVisitorIdAndDelStatus(int visitorId, int i);

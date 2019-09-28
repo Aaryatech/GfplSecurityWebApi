@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.hibernate.boot.archive.spi.ArchiveException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -38,8 +39,8 @@ public class VisitorRestController {
 
 	}
 
-	@PostMapping("/getVisitorList")
-	public @ResponseBody List<VisitorMaster> getVisitorList(@RequestBody VisitorMaster visitor) {
+	@GetMapping("/getVisitorList")
+	public @ResponseBody List<VisitorMaster> getVisitorList() {
 
 		List<VisitorMaster> list = new ArrayList<>();
 

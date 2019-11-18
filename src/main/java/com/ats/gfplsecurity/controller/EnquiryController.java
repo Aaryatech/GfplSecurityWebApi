@@ -20,7 +20,7 @@ public class EnquiryController {
 	@Autowired AlbumEnquiryRepo albmEnq;
 	
 	// --Get all AlbumEnquiry--
-		@GetMapping("/getAllPurposes")
+		@GetMapping("/getAllEnquiry")
 		public List<AlbumEnquiry> getAllPurposesWithName() {
 			return albmEnq.findByDelStatus(1);
 		}

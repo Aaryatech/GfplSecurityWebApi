@@ -33,8 +33,8 @@ public class EnquiryController {
 		
 		// --Get AlbumEnquiry By Id--
 		@PostMapping("/getEnquiryById")
-		public AlbumEnquiry getEnquiryById(@RequestParam(value = "enqId") int enqId) {
-			return albmEnq.findByEnquiryNoAndDelStatus(enqId, 1);
+		public AlbumEnquiry getEnquiryById(@RequestParam(value = "enqNo") int enqNo) {
+			return albmEnq.findByEnquiryNoAndDelStatus(enqNo, 1);
 		}
 		
 		// --Delete Purpose--

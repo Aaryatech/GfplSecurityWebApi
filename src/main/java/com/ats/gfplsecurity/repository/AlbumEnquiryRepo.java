@@ -8,9 +8,9 @@ import com.ats.gfplsecurity.model.AlbumEnquiry;
 
 public interface AlbumEnquiryRepo extends JpaRepository<AlbumEnquiry, Integer> {
 
-	List<AlbumEnquiry> findByDelStatus(int i);
+	List<AlbumEnquiry> findByDelStatus(int del);
 
-	AlbumEnquiry findByEnquiryNoAndDelStatus(int enqId, int del);
+	AlbumEnquiry findByEnquiryNoAndDelStatus(int enqNo, int del);
 
 	AlbumEnquiry findByEnquiryNo(int enqNo);
 

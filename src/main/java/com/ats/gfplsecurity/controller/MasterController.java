@@ -1,10 +1,12 @@
 package com.ats.gfplsecurity.controller;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,6 +36,7 @@ import com.ats.gfplsecurity.model.LocationDisplay;
 import com.ats.gfplsecurity.model.MaterialGatepass;
 import com.ats.gfplsecurity.model.Notification;
 import com.ats.gfplsecurity.model.OutwardGatepass;
+import com.ats.gfplsecurity.model.PresentTokenIds;
 import com.ats.gfplsecurity.model.ProductionAccess;
 import com.ats.gfplsecurity.model.Purpose;
 import com.ats.gfplsecurity.model.PurposeDisplay;
@@ -57,6 +60,7 @@ import com.ats.gfplsecurity.repository.LocationRepo;
 import com.ats.gfplsecurity.repository.MaterialGatepassRepository;
 import com.ats.gfplsecurity.repository.NotificationRepository;
 import com.ats.gfplsecurity.repository.OutwardGatepassRepository;
+import com.ats.gfplsecurity.repository.PresentTokenIdsRepo;
 import com.ats.gfplsecurity.repository.ProductionAccessRepository;
 import com.ats.gfplsecurity.repository.PurposeDisplayRepository;
 import com.ats.gfplsecurity.repository.PurposeRepository;
@@ -137,6 +141,9 @@ public class MasterController {
 
 	@Autowired
 	OutwardGatepassRepository outwardGatepassRepository;
+
+	@Autowired
+	PresentTokenIdsRepo presentTokenIdsRepo;
 
 	// --Get all Purposes--
 	@GetMapping("/allPurposes")
@@ -946,16 +953,41 @@ public class MasterController {
 		Info info = new Info();
 
 		try {
+
+			/*
+			 * List<PresentTokenIds> ids = presentTokenIdsRepo.getEmpIdsOfRegToken(token);
+			 * if (ids != null) {
+			 * 
+			 * if (ids.size() > 0) {
+			 * 
+			 * int res = 0; for (int i = 0; i < ids.size(); i++) {
+			 * 
+			 * if (ids.get(i).getEmpId() == empId) { res =
+			 * employeeRepository.updateUserToken(empId, token); } else { res =
+			 * employeeRepository.updateUserToken(ids.get(i).getEmpId(), " "); }
+			 * 
+			 * }
+			 * 
+			 * if (res == 1) { info.setError(false);
+			 * info.setMessage("Successfully Updated Token"); } else { info.setError(true);
+			 * info.setMessage(" Error Failed to Update Token"); }
+			 * 
+			 * } else { info.setError(true);
+			 * info.setMessage(" Error Failed to Update Token"); }
+			 * 
+			 * } else {
+			 */
+
 			int res = employeeRepository.updateUserToken(empId, token);
 
-			if (res == 1) {
+			if (res >0) {
 				info.setError(false);
 				info.setMessage("Successfully Updated Token");
 			} else {
 				info.setError(true);
 				info.setMessage(" Error Failed to Update Token");
 			}
-
+			// }
 		} catch (Exception e) {
 
 			e.printStackTrace();
@@ -966,8 +998,41 @@ public class MasterController {
 		return info;
 
 	}
-
+	
+	
+	
 	// -- Update App token
+		@RequestMapping(value = { "/updateChatToken" }, method = RequestMethod.POST)
+		public @ResponseBody Info updateChatToken(@RequestParam("empId") int empId, @RequestParam("token") String token) {
+
+			Info info = new Info();
+
+			try {
+
+				int res = employeeRepository.updateChatToken(empId, token);
+
+				if (res >0) {
+					info.setError(false);
+					info.setMessage("Successfully Updated Token");
+				} else {
+					info.setError(true);
+					info.setMessage(" Error Failed to Update Token");
+				}
+				// }
+			} catch (Exception e) {
+
+				e.printStackTrace();
+				info.setError(true);
+				info.setMessage("Exce Failed to Update Token ");
+
+			}
+			return info;
+
+		}
+	
+	
+
+	// -- Update DSC
 	@RequestMapping(value = { "/updateDSC" }, method = RequestMethod.POST)
 	public @ResponseBody Info updateDSC(@RequestParam("empId") int empId, @RequestParam("dsc") String dsc) {
 
@@ -1096,7 +1161,6 @@ public class MasterController {
 
 			result = outwardGatepassRepository.save(outwardGatepass);
 
-
 			if (result != null) {
 				int val = Integer.parseInt(settings.getSettingValue());
 				int value = val + 1;
@@ -1122,16 +1186,17 @@ public class MasterController {
 								if (emp.getExVar1() != null) {
 
 									try {
-									Firebase.sendPushNotifForCommunication(emp.getExVar1(),
-											"Outward Gatepass Notification",
-											"" + outwardGatepass.getEmpName() + " has generated outward gatepass for "
-													+ outwardGatepass.getOutwardName() + " which is delivered to "
-													+ outwardGatepass.getToName(),
-											"5");
-									}catch (Exception e) {
+										Firebase.sendPushNotifForCommunication(emp.getExVar1(),
+												"Outward Gatepass Notification",
+												"" + outwardGatepass.getEmpName()
+														+ " has generated outward gatepass for "
+														+ outwardGatepass.getOutwardName() + " which is delivered to "
+														+ outwardGatepass.getToName(),
+												"5");
+									} catch (Exception e) {
 										e.printStackTrace();
 									}
-									
+
 								}
 							}
 
@@ -1181,5 +1246,24 @@ public class MasterController {
 		}
 		return info;
 	}
+
+	/*
+	 * public static void main(String[] args) {
+	 * 
+	 * String token=
+	 * "dknSvnr43Vc:APA91bEbK7N6z4ROwD2jLw9nPAw-fqlbrzihMAYLTWsRaFz9FFv8kOGbSYzZZ2y7k6b8KlOjjnlVD3ep2uBXXoxCOx4c3elmoeVXv_xa809Rhs07X4EppDuHj57Q86VzN09zUblu85bM";
+	 * 
+	 * List<String> tokenList = new ArrayList<>(); tokenList.add(token);
+	 * tokenList.add(token); tokenList.add(token); tokenList.add(token);
+	 * tokenList.add(token);
+	 * 
+	 * new Firebase().send_FCM_NotificationMulti(tokenList, "TEST MSG");
+	 * 
+	 * try { new Firebase().sendPushNotifForCommunication(token,
+	 * "Duty Reminder","100 duty has been assigned", "1000"); } catch (IOException
+	 * e) { // TODO Auto-generated catch block e.printStackTrace(); }
+	 * 
+	 * }
+	 */
 
 }

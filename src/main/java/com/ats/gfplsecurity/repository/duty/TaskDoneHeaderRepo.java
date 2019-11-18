@@ -20,6 +20,9 @@ public interface TaskDoneHeaderRepo extends JpaRepository<TaskDoneHeader, Intege
 	TaskDoneHeader findByTaskDoneHeaderId(int taskDoneHeaderId);
 
 	TaskDoneHeader findByTaskDateAndDutyIdAndEmpId(String date, int dutyId, int empId);
+	
+	TaskDoneHeader findByExVar1AndDutyIdAndExInt2(String date, int dutyId, int empId);
+
 
 	// List<TaskDoneHeader> findByEmpIdAndTaskDate(@Param("empId") int empId,
 	// @Param("date") String date);

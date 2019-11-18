@@ -37,6 +37,11 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer>{
 	@Query("update Employee set ex_var1=:token  WHERE emp_id=:empId")
 	int updateUserToken(@Param("empId") int empId,@Param("token") String token);
 	
+	@Transactional
+	@Modifying
+	@Query("update Employee set ex_var3=:token  WHERE emp_id=:empId")
+	int updateChatToken(@Param("empId") int empId,@Param("token") String token);
+	
 
 	@Query(value="SELECT COALESCE(( SELECT d.emp_dept_name FROM m_emp_department d, emp_info e "
 			+ "WHERE e.emp_dept_id=d.emp_dept_id AND e.del_status=1 AND d.del_status=1 "

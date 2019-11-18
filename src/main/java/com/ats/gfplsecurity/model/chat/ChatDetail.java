@@ -15,6 +15,11 @@ import lombok.NoArgsConstructor;
 @Table(name="t_chat_task_detail")
 public class ChatDetail {
 
+	/*public ChatDetail(int i, int headerId2, int j, String string, String string2, String string3, int createdUserId,
+			String createdBy, int k, int l, int m, int n, int o, String string4, String string5, String string6) {
+		// TODO Auto-generated constructor stub
+	}*/
+	
 	@Id	@GeneratedValue(strategy = GenerationType.AUTO)
 	private int chatTaskDetailId;
 	private int headerId;

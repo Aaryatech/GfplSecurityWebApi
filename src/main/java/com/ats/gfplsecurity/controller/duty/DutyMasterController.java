@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ats.gfplsecurity.common.Firebase;
 import com.ats.gfplsecurity.common.Info;
+import com.ats.gfplsecurity.model.Employee;
 import com.ats.gfplsecurity.model.duty.AssignDuty;
 import com.ats.gfplsecurity.model.duty.AssignDutyDisplay;
 import com.ats.gfplsecurity.model.duty.AssignDutyEmployee;
@@ -36,6 +37,7 @@ import com.ats.gfplsecurity.model.duty.TaskDoneHeader;
 import com.ats.gfplsecurity.model.duty.TaskDoneHeaderDisplay;
 import com.ats.gfplsecurity.model.duty.TaskDoneWeightCalculation;
 import com.ats.gfplsecurity.repository.EmpWiseCountRepo;
+import com.ats.gfplsecurity.repository.EmployeeRepository;
 import com.ats.gfplsecurity.repository.duty.AssignDutyDisplayRepo;
 import com.ats.gfplsecurity.repository.duty.AssignDutyEmployeeRepo;
 import com.ats.gfplsecurity.repository.duty.AssignDutyRepo;
@@ -107,6 +109,9 @@ public class DutyMasterController {
 
 	@Autowired
 	DutyReportRepo dutyReportRepo;
+	
+	@Autowired
+	EmployeeRepository employeeRepository;
 
 	// -----------------------DUTY CRUD------------------------------------
 
@@ -583,6 +588,31 @@ public class DutyMasterController {
 	public TaskDoneHeader saveTaskDoneHeader(@RequestBody TaskDoneHeader taskDoneHeader) {
 		return taskDoneHeaderRepo.save(taskDoneHeader);
 	}
+	
+	@PostMapping("/saveTaskDoneHeaderWithNotify")
+	public TaskDoneHeader saveTaskDoneHeaderWithNotify(@RequestBody TaskDoneHeader taskDoneHeader) {
+		TaskDoneHeader res=taskDoneHeaderRepo.save(taskDoneHeader);
+		
+		if(res!=null) {
+			
+			try {
+				Employee emp = employeeRepository
+						.findByEmpIdAndDelStatus(taskDoneHeader.getEmpId(), 1);
+
+				if (emp.getExVar1() != null) {
+					Firebase.sendPushNotifForCommunication(emp.getExVar3(),
+							"Duty Reminder",
+							"Duty has been transfered to you, please check the duties.",
+							"10");
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+		}
+		
+		return res;
+	}
 
 	// --Get Task Done Header By Id--
 	@PostMapping("/getTaskDoneHeaderById")
@@ -720,6 +750,22 @@ public class DutyMasterController {
 
 		return result;
 	}
+	
+	
+	// get task done header by emp and from to date
+		@PostMapping("/getTaskDoneHeaderByEmpAndFromToDate")
+		public List<TaskDoneHeaderDisplay> getTaskDoneHeaderByEmpAndFromToDate(@RequestParam(value = "empId") int empId,
+				@RequestParam(value = "fromDate") String fromDate,@RequestParam(value = "toDate") String toDate) {
+			List<TaskDoneHeaderDisplay> result = null;
+			result = taskDoneHeaderDisplayRepo.getTaskDoneHeaderByEmpBetDate(empId, fromDate,toDate);
+
+			if (result == null) {
+				result = new ArrayList();
+			}
+
+			return result;
+		}
+		
 
 	// get task done Detail by header Id
 	@PostMapping("/getTaskDoneDetailByHeaderId")

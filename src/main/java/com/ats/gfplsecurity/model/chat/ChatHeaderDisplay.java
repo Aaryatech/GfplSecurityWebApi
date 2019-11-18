@@ -25,8 +25,8 @@ public class ChatHeaderDisplay {
 	private int taskCloseUserId;
 	private String taskCompleteRemark;
 	private int isReminderRequired;
-	private int reminderFrequency;
-	private int lastDate;
+	private String reminderFrequency;
+	private String lastDate;
 	private int isActive;
 	private int delStatus;
 	private Integer exInt1;

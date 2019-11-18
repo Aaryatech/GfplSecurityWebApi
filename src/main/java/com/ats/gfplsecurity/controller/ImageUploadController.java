@@ -21,24 +21,24 @@ import javassist.bytecode.stackmap.BasicBlock.Catch;
 @RestController
 public class ImageUploadController {
 
-	//private static String DOC_URL = "/opt/tomcat-latest/webapps/uploads/SUGGESTION/";
 	
-	//private static String DOC_URL="/home/lenovo/Documents/RtoUpload/";
-	//private static String DOC_URL=	"/home/aaryate1/tomcat.aaryatechindia.in/tomcat-8.0.18/webapps/rtodocupload/";
-	private static String DOC_URL=	"/opt/tomcat-latest/webapps/uploads/APP/";
-	
-	//private static String BILL_FOLDER ="/home/maxadmin/Desktop/photos/";
-	
+	private static String DOC_URL = "/opt/tomcat-latest/webapps/uploads/APP/";
+
+	 private static String CHAT_URL= "/opt/tomcat-latest/webapps/uploads/APP/CHAT/";
+	//private static String CHAT_URL = "C:/Users/MAXADMIN/Desktop/chat/";
+
+
 	@RequestMapping(value = { "/photoUpload" }, method = RequestMethod.POST)
-	public @ResponseBody Info getFarmerContract(@RequestParam("file") MultipartFile[] uploadfile , @RequestParam("imageName") List<String> imageName,@RequestParam("type") String type) {
-System.err.println(" no  of files to push " +uploadfile.length);
+	public @ResponseBody Info getFarmerContract(@RequestParam("file") MultipartFile[] uploadfile,
+			@RequestParam("imageName") List<String> imageName, @RequestParam("type") String type) {
+		System.err.println(" no  of files to push " + uploadfile.length);
 		Info info = new Info();
 
-		//System.out.println("File Name " + imageName.toString());
+		// System.out.println("File Name " + imageName.toString());
 
 		try {
 
-			saveUploadedFiles(uploadfile ,  imageName,type);
+			saveUploadedFiles(uploadfile, imageName, type);
 
 			info.setError(false);
 			info.setMessage("File uploaded successfully");
@@ -54,54 +54,33 @@ System.err.println(" no  of files to push " +uploadfile.length);
 	}
 
 	// save file
-	private void saveUploadedFiles(MultipartFile[] files,  List<String> imageName,String type) throws IOException {
+	private void saveUploadedFiles(MultipartFile[] files, List<String> imageName, String type) throws IOException {
 
-		/*try {
-		for (MultipartFile file : files) {
-			Path path=null;
-			if (file.isEmpty()) {
-				continue; 
-			}
-            if(type.equalsIgnoreCase("1"))
-            {
-			 path =Paths.get(DOC_URL + imageName);
-            }
-
-            
-			byte[] bytes = file.getBytes();
-			
-			Files.write(path, bytes);
-
-		}
-
-	
-	}*/
 		
 		try {
-			for (int i=0;i<files.length;i++) {
-				Path path=null;
-				
-	            if(type.equalsIgnoreCase("1"))
-	            {
-	            	
-	            String name=imageName.get(i).substring(1, imageName.get(i).length()-1);
-	            
-				 path =Paths.get(DOC_URL + name);
-	            }
+			for (int i = 0; i < files.length; i++) {
+				Path path = null;
 
-	            
-				byte[] bytes = files[i].getBytes();
+				if (type.equalsIgnoreCase("1")) {
+
+					String name = imageName.get(i).substring(1, imageName.get(i).length() - 1);
+					path = Paths.get(DOC_URL + name);
+					
+				} else if (type.equalsIgnoreCase("chat")) {
+
+					String name = imageName.get(i).substring(1, imageName.get(i).length() - 1);
+					path = Paths.get(CHAT_URL + name);
+					
+				}
 				
+				byte[] bytes = files[i].getBytes();
 				Files.write(path, bytes);
 
 			}
 
-		
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-	catch(Exception e)
-	{
-		e.printStackTrace();
-	}
 
-}
+	}
 }

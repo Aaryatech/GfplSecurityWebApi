@@ -187,6 +187,33 @@ public class ChecklistController {
 
 		return headerList;
 	}
+	
+	
+	@PostMapping("/getAllChecklistByDeptAndUnAssigned")
+	public List<ChecklistHeader> getAllChecklistByDeptAndUnAssigned(@RequestParam(value = "deptId") int deptId) {
+
+		List<ChecklistHeader> headerList = new ArrayList<>();
+
+		headerList = checklistHeaderRepo.getUnAssignedChecklistByDept(deptId);
+
+		if (headerList != null) {
+			if (headerList.size() > 0) {
+				for (int i = 0; i < headerList.size(); i++) {
+
+					List<ChecklistDetail> detailList = checklistDetailRepo.findAllByDelStatusAndChecklistHeaderId(1,
+							headerList.get(i).getChecklistHeaderId());
+
+					headerList.get(i).setChecklistDetail(detailList);
+				}
+			}
+
+		}
+
+		return headerList;
+	}
+
+	
+	
 
 	// ------------CHECKLIST DETAIL CRUD------------------
 

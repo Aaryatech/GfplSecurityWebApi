@@ -26,6 +26,9 @@ public class ImageUploadController {
 
 	 private static String CHAT_URL= "/opt/tomcat-latest/webapps/uploads/APP/CHAT/";
 	//private static String CHAT_URL = "C:/Users/MAXADMIN/Desktop/chat/";
+	 
+	 public static final String ALBUM_FOLDER = "/opt/tomcat-latest/webapps/uploads/ALBUM/";
+
 
 
 	@RequestMapping(value = { "/photoUpload" }, method = RequestMethod.POST)
@@ -70,6 +73,11 @@ public class ImageUploadController {
 
 					String name = imageName.get(i).substring(1, imageName.get(i).length() - 1);
 					path = Paths.get(CHAT_URL + name);
+					
+				}else if (type.equalsIgnoreCase("album")) {
+
+					String name = imageName.get(i).substring(1, imageName.get(i).length() - 1);
+					path = Paths.get(ALBUM_FOLDER + name);
 					
 				}
 				

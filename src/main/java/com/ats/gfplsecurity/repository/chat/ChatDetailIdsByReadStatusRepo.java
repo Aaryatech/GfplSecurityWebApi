@@ -1,5 +1,6 @@
 package com.ats.gfplsecurity.repository.chat;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,5 +16,7 @@ public interface ChatDetailIdsByReadStatusRepo extends JpaRepository<ChatDetailI
 	@Query(value = " SELECT chat_task_detail_id FROM t_chat_task_detail WHERE mark_as_read=:readStatus AND del_status=1  ", nativeQuery = true)
 	List<ChatDetailIdsByReadStatus> getChatDetailIdsByMarkStatus(@Param("readStatus") int readStatus);
 
+	@Query(value = " SELECT chat_task_detail_id FROM t_chat_task_detail WHERE mark_as_read=3 AND chat_task_detail_id IN(:detailIds)  ", nativeQuery = true)
+	List<ChatDetailIdsByReadStatus> getChatDetailIdsByIds(@Param("detailIds") ArrayList<Integer> detailIds);
 
 }

@@ -37,9 +37,9 @@ public class EnquiryController {
 			return albmEnq.findByEnquiryNoAndDelStatus(enqNo, 1);
 		}
 		
-		// --Delete Purpose--
-		@PostMapping("/deletePurpose")
-		public Info deleteNote(@RequestParam(value = "enqNo") int enqNo) {
+		// --deleteAlbumEnquiry--
+		@PostMapping("/deleteAlbumEnquiry")
+		public Info deleteAlbumEnquiry(@RequestParam(value = "enqNo") int enqNo) {
 			Info info = null;
 
 			AlbumEnquiry albm = albmEnq.findByEnquiryNo(enqNo);
@@ -57,4 +57,22 @@ public class EnquiryController {
 			}
 			return info;
 		}
+		
+		// --Update AlbumId--
+				@PostMapping("/updateAlbumId")
+				public Info saveAlbumEnquiry(@RequestParam(value = "enqId") int enqId, @RequestParam(value = "albmId") int albmId) {
+				Info info = new Info();
+					int updatedAlbmId = albmEnq.updtAlbmIdByEnqId(enqId, albmId);
+					
+					if(updatedAlbmId!=0) {
+						info.setError(false);
+						info.setMessage("AlbumEnquiry Updated Successfully");
+					} else {
+						info = new Info();
+						info.setError(true);
+						info.setMessage("AlbumEnquiry Update Failed");
+					}						
+					
+					return info;
+				}
 }

@@ -15,6 +15,10 @@ public interface ChatHeaderRepo extends JpaRepository<ChatHeader, Integer> {
 
 	List<ChatHeader> findAllByDelStatus(int i);
 
+	//21/11/2019
+	List<ChatHeader> findByDelStatusAndStatusIn(int i,List<Integer> status);
+
+	
 	List<ChatHeader> findAllByDelStatusAndIsActive(int i,int j);
 	
 	ChatHeader findByHeaderId(int i);

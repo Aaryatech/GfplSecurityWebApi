@@ -5,6 +5,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -37,4 +38,14 @@ public class ChatDetail {
 	private String exVar1;
 	private String exVar2;
 	private String exVar3;
+
+	
+	@Transient
+	private int replyToMsgType;
+
+	@Transient
+	private String replyToMsg;
+
+	@Transient
+	private String replyToName;
 }

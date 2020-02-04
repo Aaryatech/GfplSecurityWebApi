@@ -917,7 +917,13 @@ public class SchedulerJob {
 	@Scheduled(cron = "2 * * * * *")
 	public void notifyChatTask() {
 
-		List<ChatHeader> headerList = chatHeaderRepo.findAllByDelStatus(1);
+		//List<ChatHeader> headerList = chatHeaderRepo.findAllByDelStatus(1);
+		List<Integer> status=new ArrayList<>();
+		status.add(0);
+		status.add(1);
+		
+		List<ChatHeader> headerList = chatHeaderRepo.findByDelStatusAndStatusIn(1,status);
+		System.err.println("HEADERS ---------------- "+headerList);
 
 		if (headerList != null) {
 
@@ -1004,36 +1010,8 @@ public class SchedulerJob {
 
 	}
 
-	// ---UPDATE CHAT READ STATUS---
-
-	//@Scheduled(cron = "2 * * * * *")
-	/*public void scheduleUpdateChatREadStatus() {
-
-		List<ChatDetail> chatDetailList = chatDetailRepo.findAllByDelStatusAndMarkAsRead(1, 1);
-
-		if (chatDetailList != null) {
-
-			for (int i = 0; i < chatDetailList.size(); i++) {
-					
-				
-				
-			}
-
-		}
-
-	}*/
-
 	
 	
 	
-	/*-----UPDATE READ IF COUNT SAME---
-	 * 
-	 * UPDATE t_chat_task_detail SET mark_as_read = CASE WHEN( SELECT (
-	 * CHAR_LENGTH(h.assign_user_ids) - CHAR_LENGTH( REPLACE (h.assign_user_ids,
-	 * ',', '') ) +1 ) FROM t_chat_task_header h WHERE h.header_id =
-	 * t_chat_task_detail.header_id ) =( ( CHAR_LENGTH(t_chat_task_detail.ex_var1) -
-	 * CHAR_LENGTH( REPLACE (t_chat_task_detail.ex_var1, ',', '') ) +1 ) ) THEN 2
-	 * ELSE 1 END WHERE t_chat_task_detail.chat_task_detail_id = 10
-	 */
-
+	
 }

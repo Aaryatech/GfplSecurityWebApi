@@ -5,8 +5,13 @@ import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,10 +45,12 @@ import com.ats.gfplsecurity.repository.chat.ChatHeaderEmpListRepo;
 import com.ats.gfplsecurity.repository.chat.ChatHeaderRepo;
 import com.ats.gfplsecurity.repository.chat.ChatMemoDisplayRepo;
 import com.ats.gfplsecurity.repository.chat.ChatMemoRepo;
+import com.ats.gfplsecurity.repository.chat.ChatReadModelRepo;
 import com.ats.gfplsecurity.repository.chat.MemoGeneratedRepo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ats.gfplsecurity.model.chat.ChatMemo;
 import com.ats.gfplsecurity.model.chat.ChatMemoDisplay;
+import com.ats.gfplsecurity.model.chat.ChatReadModel;
 import com.ats.gfplsecurity.model.chat.MemoGenerated;
 
 @RestController
@@ -88,6 +95,9 @@ public class ChatController {
 
 	@Autowired
 	ChatDetailIdsByReadStatusRepo chatDetailIdsByReadStatusRepo;
+
+	@Autowired
+	ChatReadModelRepo chatReadModelRepo;
 
 	// -----------------------CHAT GROUP CRUD------------------------------------
 
@@ -233,6 +243,30 @@ public class ChatController {
 	public ChatHeader saveChatGroup(@RequestBody ChatHeader chatHeader) {
 		ChatHeader header = null;
 
+		if (chatHeader != null) {
+
+			System.err.println("EMP ID  --------------- " + chatHeader);
+
+			String ids = chatHeader.getCreatedUserId() + "," + chatHeader.getAdminUserIds() + ","
+					+ chatHeader.getAssignUserIds();
+
+			List<Integer> empIdList = Stream.of(ids.split(",")).map(Integer::parseInt).collect(Collectors.toList());
+
+			Set<Integer> set = new LinkedHashSet<>();
+			set.addAll(empIdList);
+			empIdList.clear();
+			empIdList.addAll(set);
+
+			System.err.println("EMP ID LIST --------------- " + empIdList);
+
+			String empList = Arrays.toString(empIdList.toArray()).replace("[", "").replace("]", "").replace(" ", "");
+
+			System.err.println("STRING LIST --------------- " + empList);
+
+			chatHeader.setAssignUserIds(empList);
+
+		}
+
 		header = chatHeaderRepo.save(chatHeader);
 
 		if (header == null) {
@@ -245,11 +279,6 @@ public class ChatController {
 
 			Calendar cal = Calendar.getInstance();
 			String date = String.valueOf(cal.getTimeInMillis());
-
-			/*
-			 * ChatDetail chat = new ChatDetail(0, header.getHeaderId(), 1, "Task created",
-			 * date, date, header.getCreatedUserId(), createdBy, 1, 1, 0, 0, 0, "", "", "");
-			 */
 
 			ChatDetail chat = new ChatDetail();
 			chat.setChatTaskDetailId(0);
@@ -314,6 +343,30 @@ public class ChatController {
 	@PostMapping("/editChatHeader")
 	public ChatHeader editChatGroup(@RequestBody ChatHeader chatHeader) {
 		ChatHeader header = null;
+
+		if (chatHeader != null) {
+
+			System.err.println("EMP ID  --------------- " + chatHeader);
+
+			String ids = chatHeader.getCreatedUserId() + "," + chatHeader.getAdminUserIds() + ","
+					+ chatHeader.getAssignUserIds();
+
+			List<Integer> empIdList = Stream.of(ids.split(",")).map(Integer::parseInt).collect(Collectors.toList());
+
+			Set<Integer> set = new LinkedHashSet<>();
+			set.addAll(empIdList);
+			empIdList.clear();
+			empIdList.addAll(set);
+
+			System.err.println("EMP ID LIST --------------- " + empIdList);
+
+			String empList = Arrays.toString(empIdList.toArray()).replace("[", "").replace("]", "").replace(" ", "");
+
+			System.err.println("STRING LIST --------------- " + empList);
+
+			chatHeader.setAssignUserIds(empList);
+
+		}
 
 		header = chatHeaderRepo.save(chatHeader);
 
@@ -509,6 +562,19 @@ public class ChatController {
 		detail = chatDetailRepo.save(chatDetail);
 		System.err.println("CHAT SAVED --------------------------------------------------------------- " + detail);
 
+		if (detail != null) {
+			if (detail.getExInt1() > 0) {
+
+				ChatDetail chat = chatDetailRepo.findByChatTaskDetailId(detail.getExInt1());
+				if (chat != null) {
+					detail.setReplyToMsgType(chat.getTypeOfText());
+					detail.setReplyToMsg(chat.getTextValue());
+					detail.setReplyToName(chat.getUserName());
+				}
+
+			}
+		}
+
 		if (detail == null) {
 			detail = new ChatDetail();
 		} else {
@@ -553,8 +619,7 @@ public class ChatController {
 
 		return detail;
 	}
-	
-	
+
 	@PostMapping("/saveChatDetailNotifyToAll")
 	public ChatDetail saveChatDetailNotifyToAll(@RequestBody ChatDetail chatDetail) {
 		ChatDetail detail = null;
@@ -608,7 +673,6 @@ public class ChatController {
 
 		return detail;
 	}
-	
 
 	@PostMapping("/saveChatDetailWithoutNotify")
 	public List<ChatDetail> saveChatDetailWithoutNotify(@RequestBody ArrayList<ChatDetail> chatDetailList) {
@@ -850,7 +914,9 @@ public class ChatController {
 									tokenList.add(empTokenList.get(j).getToken());
 								}
 
-								new Firebase().send_FCM_NotificationList(tokenList,""+chatDetailList.get(i).getChatTaskDetailId(),"readTag",""+chatDetailList.get(i).getChatTaskDetailId());
+								new Firebase().send_FCM_NotificationList(tokenList,
+										"" + chatDetailList.get(i).getChatTaskDetailId(), "readTag",
+										"" + chatDetailList.get(i).getChatTaskDetailId());
 
 							}
 
@@ -872,6 +938,21 @@ public class ChatController {
 		List<ChatDetailIdsByReadStatus> idList = chatDetailIdsByReadStatusRepo.getChatDetailIdsByMarkStatus(readStatus);
 		System.err.println("ID LIST------------------------- " + idList);
 		return idList;
+	}
+
+	// -----18-11-2019----------
+	@PostMapping("/getChatDetailIdsRead")
+	public List<ChatDetailIdsByReadStatus> getChatDetailIdsRead(@RequestBody ArrayList<Integer> detailIds) {
+		List<ChatDetailIdsByReadStatus> idList = chatDetailIdsByReadStatusRepo.getChatDetailIdsByIds(detailIds);
+		System.err.println("ID LIST------------------------- " + idList);
+		return idList;
+	}
+
+	// ------23/11/2019-------------------
+	@PostMapping("/getEmpChatRead")
+	public List<ChatReadModel> getEmpChatRead(@RequestParam(value = "detailId") int detailId) {
+		List<ChatReadModel> empList = chatReadModelRepo.getEmpChatRead(detailId);
+		return empList;
 	}
 
 }

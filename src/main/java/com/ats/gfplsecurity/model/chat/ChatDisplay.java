@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,5 +24,9 @@ public class ChatDisplay {
 	private String userName;
 	private int delStatus;
 	private int markAsRead;
+	private Integer replyToId;
+	private Integer replyToMsgType;
+	private String replyToMsg;
+	private String replyToName;
 	
 }

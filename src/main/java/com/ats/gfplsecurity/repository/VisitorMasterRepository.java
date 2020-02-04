@@ -23,3 +23,4 @@ public interface VisitorMasterRepository extends JpaRepository<VisitorMaster, In
 	VisitorMaster findByVisitorIdAndDelStatus(int visitorId, int i);
 
 }
+ 

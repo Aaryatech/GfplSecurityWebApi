@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.ats.gfplsecurity.model.AlbumEnquiry;
 
-public interface AlbumEnquiryRepo extends JpaRepository<AlbumEnquiry, Integer> {
+public interface AlbumEnquiryRepo extends JpaRepository<AlbumEnquiry, Integer> { 
 
 	List<AlbumEnquiry> findByDelStatus(int del);
 
